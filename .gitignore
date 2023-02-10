@@ -1,0 +1,16 @@
+# Project Files
+.vs/
+**.sln
+**.vcxproj
+**.vcxproj.user
+**.vcxproj.filters
+JSON/
+
+# Build Artifacts
+bin/
+
+# Conan
+conaninfo.txt
+conanbuildinfo.*
+conan.lock
+graph_info.json

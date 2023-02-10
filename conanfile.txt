@@ -1,0 +1,6 @@
+[requires]
+glfw/3.3.8
+vulkan-memory-allocator/3.0.1
+
+[generators]
+premake

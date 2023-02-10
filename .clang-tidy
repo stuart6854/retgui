@@ -1,0 +1,4 @@
+Checks: 'hicpp-*,modernize-*,clang-analyzer-*,cppcoreguidelines-*,performance-*,portability-*,readability-*,-*-special-member-functions,-modernize-use-nodiscard,-readability-redundant-access-specifiers,-cppcoreguidelines-macro-usage,-*-implicit-bool-conversion,-cppcoreguidelines-pro-type-reinterpret-cast,-*-magic-numbers,-*-trailing-return-type,-readability-identifier-length'
+# CheckOptions:
+#     - key:  
+#       value:
