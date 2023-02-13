@@ -8,6 +8,9 @@ JSON/
 
 # Build Artifacts
 bin/
+# Compiled shaders
+*.spv
+*.u32
 
 # Conan
 conaninfo.txt
