@@ -62,6 +62,19 @@ static void check_vk_result(vk::Result result)
     fprintf(stderr, "[Vulkan] Error: vk::Result = %s\n", vk::to_string(result).c_str());
 }
 
+static bool vk_extension_supported(const char* extension_name)
+{
+    const auto supported_extensions = g_physicalDevice.enumerateDeviceExtensionProperties();
+    for (auto& ext : supported_extensions)
+    {
+        if (std::strcmp(extension_name, ext.extensionName) == 0)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                                                      VkDebugUtilsMessageTypeFlagsEXT messageTypes,
                                                      const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
@@ -149,6 +162,20 @@ static void setup_vulkan(std::vector<const char*> instance_extensions)
 
     // Create logical device
     {
+        {
+            RET_ASSERT(vk_extension_supported(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME) &&
+                       "The Vulkan implementation of RetGui requires the 'VK_EXT_descriptor_indexing' device extension!");
+
+            const auto features2 =
+                g_physicalDevice.getFeatures2<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceDescriptorIndexingFeatures>();
+
+            const auto& descriptor_indexing_features = features2.get<vk::PhysicalDeviceDescriptorIndexingFeatures>();
+
+            RET_ASSERT(descriptor_indexing_features.descriptorBindingPartiallyBound &&
+                       descriptor_indexing_features.runtimeDescriptorArray &&
+                       "GPU is missing features for device extension 'VK_EXT_descriptor_indexing'!");
+        }
+
         const float queue_priority = 1.0f;
         vk::DeviceQueueCreateInfo queue_info{};
         queue_info.setQueueFamilyIndex(g_queueFamily);
@@ -160,10 +187,15 @@ static void setup_vulkan(std::vector<const char*> instance_extensions)
         vk::PhysicalDeviceDynamicRenderingFeatures dynamic_rendering_features{};
         dynamic_rendering_features.setDynamicRendering(true);
 
+        vk::PhysicalDeviceDescriptorIndexingFeatures indexing_features{};
+        indexing_features.setDescriptorBindingPartiallyBound(true);
+        indexing_features.setRuntimeDescriptorArray(true);
+        indexing_features.setPNext(&dynamic_rendering_features);
+
         vk::DeviceCreateInfo create_info{};
         create_info.setQueueCreateInfos(queue_info);
         create_info.setPEnabledExtensionNames(device_extensions);
-        create_info.setPNext(&dynamic_rendering_features);
+        create_info.setPNext(&indexing_features);
         g_device = g_physicalDevice.createDevice(create_info);
         VULKAN_HPP_DEFAULT_DISPATCHER.init(g_device);
 
