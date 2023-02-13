@@ -9,6 +9,7 @@
 #define VULKAN_HPP_NO_NODISCARD_WARNINGS
 #define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
 #include <vulkan/vulkan.hpp>
+#define VMA_IMPLEMENTATION
 #include <vma/vk_mem_alloc.h>
 
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
@@ -41,6 +42,14 @@ static std::vector<vk::Image> g_swapchainImages;
 static std::vector<vk::ImageView> g_swapchainViews;
 static uint32_t g_imageIndex;
 static bool g_rebuildSwapchain = false;
+
+static vk::PipelineLayout g_pipelineLayout;
+static vk::Pipeline g_pipeline;
+
+static vk::Buffer g_vertexBuffer;
+static VmaAllocation g_vertexBufferAlloc;
+static vk::Buffer g_indexBuffer;
+static VmaAllocation g_indexBufferAlloc;
 
 static std::array<float, 4> clear_color = { 0.45f, 0.55f, 0.60f, 1.00f };
 
@@ -161,6 +170,16 @@ static void setup_vulkan(std::vector<const char*> instance_extensions)
         g_queue = g_device.getQueue(g_queueFamily, 0);
     }
 
+    // Create allocation
+    {
+        VmaAllocatorCreateInfo create_info{};
+        create_info.instance = g_instance;
+        create_info.physicalDevice = g_physicalDevice;
+        create_info.device = g_device;
+        create_info.vulkanApiVersion = VK_API_VERSION_1_3;
+        vmaCreateAllocator(&create_info, &g_allocator);
+    }
+
     // Create descriptor pool
     {
         std::vector<vk::DescriptorPoolSize> pool_sizes = {
@@ -230,8 +249,226 @@ static void setup_vulkan_window(uint32_t width, uint32_t height)
     }
 }
 
+static std::vector<uint32_t> __vk_shader_vert_spv = {
+    0x07230203, 0x00010000, 0x0008000b, 0x0000002e, 0x00000000, 0x00020011, 0x00000001, 0x0006000b, 0x00000001, 0x4c534c47, 0x6474732e,
+    0x3035342e, 0x00000000, 0x0003000e, 0x00000000, 0x00000001, 0x000b000f, 0x00000000, 0x00000004, 0x6e69616d, 0x00000000, 0x0000000d,
+    0x00000012, 0x00000027, 0x00000028, 0x0000002a, 0x0000002c, 0x00030003, 0x00000002, 0x000001c2, 0x00040005, 0x00000004, 0x6e69616d,
+    0x00000000, 0x00060005, 0x0000000b, 0x505f6c67, 0x65567265, 0x78657472, 0x00000000, 0x00060006, 0x0000000b, 0x00000000, 0x505f6c67,
+    0x7469736f, 0x006e6f69, 0x00070006, 0x0000000b, 0x00000001, 0x505f6c67, 0x746e696f, 0x657a6953, 0x00000000, 0x00070006, 0x0000000b,
+    0x00000002, 0x435f6c67, 0x4470696c, 0x61747369, 0x0065636e, 0x00070006, 0x0000000b, 0x00000003, 0x435f6c67, 0x446c6c75, 0x61747369,
+    0x0065636e, 0x00030005, 0x0000000d, 0x00000000, 0x00040005, 0x00000012, 0x6f705f61, 0x00000073, 0x00060005, 0x00000014, 0x68737550,
+    0x736e6f43, 0x746e6174, 0x00000073, 0x00050006, 0x00000014, 0x00000000, 0x6c616373, 0x00000065, 0x00060006, 0x00000014, 0x00000001,
+    0x6e617274, 0x74616c73, 0x00000065, 0x00050005, 0x00000016, 0x68737570, 0x6e6f635f, 0x00737473, 0x00040005, 0x00000027, 0x5f74756f,
+    0x00007675, 0x00040005, 0x00000028, 0x76755f61, 0x00000000, 0x00050005, 0x0000002a, 0x5f74756f, 0x6f6c6f63, 0x00000072, 0x00040005,
+    0x0000002c, 0x6f635f61, 0x00726f6c, 0x00050048, 0x0000000b, 0x00000000, 0x0000000b, 0x00000000, 0x00050048, 0x0000000b, 0x00000001,
+    0x0000000b, 0x00000001, 0x00050048, 0x0000000b, 0x00000002, 0x0000000b, 0x00000003, 0x00050048, 0x0000000b, 0x00000003, 0x0000000b,
+    0x00000004, 0x00030047, 0x0000000b, 0x00000002, 0x00040047, 0x00000012, 0x0000001e, 0x00000000, 0x00050048, 0x00000014, 0x00000000,
+    0x00000023, 0x00000000, 0x00050048, 0x00000014, 0x00000001, 0x00000023, 0x00000008, 0x00030047, 0x00000014, 0x00000002, 0x00040047,
+    0x00000027, 0x0000001e, 0x00000000, 0x00040047, 0x00000028, 0x0000001e, 0x00000001, 0x00040047, 0x0000002a, 0x0000001e, 0x00000001,
+    0x00040047, 0x0000002c, 0x0000001e, 0x00000002, 0x00020013, 0x00000002, 0x00030021, 0x00000003, 0x00000002, 0x00030016, 0x00000006,
+    0x00000020, 0x00040017, 0x00000007, 0x00000006, 0x00000004, 0x00040015, 0x00000008, 0x00000020, 0x00000000, 0x0004002b, 0x00000008,
+    0x00000009, 0x00000001, 0x0004001c, 0x0000000a, 0x00000006, 0x00000009, 0x0006001e, 0x0000000b, 0x00000007, 0x00000006, 0x0000000a,
+    0x0000000a, 0x00040020, 0x0000000c, 0x00000003, 0x0000000b, 0x0004003b, 0x0000000c, 0x0000000d, 0x00000003, 0x00040015, 0x0000000e,
+    0x00000020, 0x00000001, 0x0004002b, 0x0000000e, 0x0000000f, 0x00000000, 0x00040017, 0x00000010, 0x00000006, 0x00000002, 0x00040020,
+    0x00000011, 0x00000001, 0x00000010, 0x0004003b, 0x00000011, 0x00000012, 0x00000001, 0x0004001e, 0x00000014, 0x00000010, 0x00000010,
+    0x00040020, 0x00000015, 0x00000009, 0x00000014, 0x0004003b, 0x00000015, 0x00000016, 0x00000009, 0x00040020, 0x00000017, 0x00000009,
+    0x00000010, 0x0004002b, 0x0000000e, 0x0000001b, 0x00000001, 0x0004002b, 0x00000006, 0x0000001f, 0x00000000, 0x0004002b, 0x00000006,
+    0x00000020, 0x3f800000, 0x00040020, 0x00000024, 0x00000003, 0x00000007, 0x00040020, 0x00000026, 0x00000003, 0x00000010, 0x0004003b,
+    0x00000026, 0x00000027, 0x00000003, 0x0004003b, 0x00000011, 0x00000028, 0x00000001, 0x0004003b, 0x00000024, 0x0000002a, 0x00000003,
+    0x00040020, 0x0000002b, 0x00000001, 0x00000007, 0x0004003b, 0x0000002b, 0x0000002c, 0x00000001, 0x00050036, 0x00000002, 0x00000004,
+    0x00000000, 0x00000003, 0x000200f8, 0x00000005, 0x0004003d, 0x00000010, 0x00000013, 0x00000012, 0x00050041, 0x00000017, 0x00000018,
+    0x00000016, 0x0000000f, 0x0004003d, 0x00000010, 0x00000019, 0x00000018, 0x00050085, 0x00000010, 0x0000001a, 0x00000013, 0x00000019,
+    0x00050041, 0x00000017, 0x0000001c, 0x00000016, 0x0000001b, 0x0004003d, 0x00000010, 0x0000001d, 0x0000001c, 0x00050081, 0x00000010,
+    0x0000001e, 0x0000001a, 0x0000001d, 0x00050051, 0x00000006, 0x00000021, 0x0000001e, 0x00000000, 0x00050051, 0x00000006, 0x00000022,
+    0x0000001e, 0x00000001, 0x00070050, 0x00000007, 0x00000023, 0x00000021, 0x00000022, 0x0000001f, 0x00000020, 0x00050041, 0x00000024,
+    0x00000025, 0x0000000d, 0x0000000f, 0x0003003e, 0x00000025, 0x00000023, 0x0004003d, 0x00000010, 0x00000029, 0x00000028, 0x0003003e,
+    0x00000027, 0x00000029, 0x0004003d, 0x00000007, 0x0000002d, 0x0000002c, 0x0003003e, 0x0000002a, 0x0000002d, 0x000100fd, 0x00010038
+};
+
+static std::vector<uint32_t> __vk_shader_frag_spv = {
+    0x07230203, 0x00010000, 0x0008000b, 0x00000010, 0x00000000, 0x00020011, 0x00000001, 0x0006000b, 0x00000001, 0x4c534c47, 0x6474732e,
+    0x3035342e, 0x00000000, 0x0003000e, 0x00000000, 0x00000001, 0x0008000f, 0x00000004, 0x00000004, 0x6e69616d, 0x00000000, 0x00000009,
+    0x0000000b, 0x0000000f, 0x00030010, 0x00000004, 0x00000007, 0x00030003, 0x00000002, 0x000001c2, 0x00040005, 0x00000004, 0x6e69616d,
+    0x00000000, 0x00050005, 0x00000009, 0x67617266, 0x6c6f635f, 0x0000726f, 0x00050005, 0x0000000b, 0x635f6e69, 0x726f6c6f, 0x00000000,
+    0x00040005, 0x0000000f, 0x755f6e69, 0x00000076, 0x00040047, 0x00000009, 0x0000001e, 0x00000000, 0x00040047, 0x0000000b, 0x0000001e,
+    0x00000001, 0x00040047, 0x0000000f, 0x0000001e, 0x00000000, 0x00020013, 0x00000002, 0x00030021, 0x00000003, 0x00000002, 0x00030016,
+    0x00000006, 0x00000020, 0x00040017, 0x00000007, 0x00000006, 0x00000004, 0x00040020, 0x00000008, 0x00000003, 0x00000007, 0x0004003b,
+    0x00000008, 0x00000009, 0x00000003, 0x00040020, 0x0000000a, 0x00000001, 0x00000007, 0x0004003b, 0x0000000a, 0x0000000b, 0x00000001,
+    0x00040017, 0x0000000d, 0x00000006, 0x00000002, 0x00040020, 0x0000000e, 0x00000001, 0x0000000d, 0x0004003b, 0x0000000e, 0x0000000f,
+    0x00000001, 0x00050036, 0x00000002, 0x00000004, 0x00000000, 0x00000003, 0x000200f8, 0x00000005, 0x0004003d, 0x00000007, 0x0000000c,
+    0x0000000b, 0x0003003e, 0x00000009, 0x0000000c, 0x000100fd, 0x00010038
+};
+
+static void setup_vulkan_pipeline(vk::Format attachment_format)
+{
+    vk::PushConstantRange push_range{};
+    push_range.setStageFlags(vk::ShaderStageFlagBits::eVertex);
+    push_range.setOffset(0);
+    push_range.setSize(sizeof(RetVec2) * 2);
+
+    vk::PipelineLayoutCreateInfo layout_info{};
+    layout_info.setPushConstantRanges(push_range);
+    g_pipelineLayout = g_device.createPipelineLayout(layout_info);
+
+    vk::ShaderModuleCreateInfo vertex_module_info{};
+    vertex_module_info.setCode(__vk_shader_vert_spv);
+    auto vertex_module = g_device.createShaderModule(vertex_module_info);
+
+    vk::ShaderModuleCreateInfo pixel_module_info{};
+    pixel_module_info.setCode(__vk_shader_frag_spv);
+    auto pixel_module = g_device.createShaderModule(pixel_module_info);
+
+    std::array<vk::PipelineShaderStageCreateInfo, 2> stages{};
+    stages[0].setStage(vk::ShaderStageFlagBits::eVertex);
+    stages[0].setModule(vertex_module);
+    stages[0].setPName("main");
+    stages[1].setStage(vk::ShaderStageFlagBits::eFragment);
+    stages[1].setModule(pixel_module);
+    stages[1].setPName("main");
+
+    vk::VertexInputBindingDescription binding_desc{};
+    binding_desc.setStride(sizeof(RetDrawVert));
+    binding_desc.setInputRate(vk::VertexInputRate::eVertex);
+
+    std::array<vk::VertexInputAttributeDescription, 3> attribute_descs{};
+    attribute_descs[0].setBinding(0);
+    attribute_descs[0].setLocation(0);
+    attribute_descs[0].setFormat(vk::Format::eR32G32Sfloat);
+    attribute_descs[0].setOffset(offsetof(RetDrawVert, position));
+    attribute_descs[1].setBinding(0);
+    attribute_descs[1].setLocation(1);
+    attribute_descs[1].setFormat(vk::Format::eR32G32Sfloat);
+    attribute_descs[1].setOffset(offsetof(RetDrawVert, texCoord));
+    attribute_descs[2].setBinding(0);
+    attribute_descs[2].setLocation(2);
+    attribute_descs[2].setFormat(vk::Format::eR32G32B32A32Sfloat);
+    attribute_descs[2].setOffset(offsetof(RetDrawVert, color));
+
+    vk::PipelineVertexInputStateCreateInfo vertex_info{};
+    vertex_info.setVertexBindingDescriptions(binding_desc);
+    vertex_info.setVertexAttributeDescriptions(attribute_descs);
+
+    vk::PipelineInputAssemblyStateCreateInfo input_assembly_info{};
+    input_assembly_info.setTopology(vk::PrimitiveTopology::eTriangleList);
+
+    vk::PipelineViewportStateCreateInfo viewport_info{};
+    viewport_info.setViewportCount(1);
+    viewport_info.setScissorCount(1);
+
+    vk::PipelineRasterizationStateCreateInfo rasterization_info{};
+    rasterization_info.setPolygonMode(vk::PolygonMode::eFill);
+    rasterization_info.setCullMode(vk::CullModeFlagBits::eNone);  // #TODO: Cull back face?
+    rasterization_info.setFrontFace(vk::FrontFace::eCounterClockwise);
+    rasterization_info.setLineWidth(1.0f);
+
+    vk::PipelineMultisampleStateCreateInfo multisample_info{};
+    multisample_info.setRasterizationSamples(vk::SampleCountFlagBits::e1);
+
+    vk::PipelineColorBlendAttachmentState color_attachment_state{};
+    color_attachment_state.setBlendEnable(true);
+    color_attachment_state.setSrcColorBlendFactor(vk::BlendFactor::eSrcAlpha);
+    color_attachment_state.setDstColorBlendFactor(vk::BlendFactor::eOneMinusSrcAlpha);
+    color_attachment_state.setColorBlendOp(vk::BlendOp::eAdd);
+    color_attachment_state.setSrcAlphaBlendFactor(vk::BlendFactor::eOne);
+    color_attachment_state.setDstAlphaBlendFactor(vk::BlendFactor::eOneMinusSrcAlpha);
+    color_attachment_state.setAlphaBlendOp(vk::BlendOp::eAdd);
+    color_attachment_state.setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
+                                             vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA);
+
+    vk::PipelineColorBlendStateCreateInfo color_blend_info{};
+    color_blend_info.setAttachments(color_attachment_state);
+
+    vk::PipelineDepthStencilStateCreateInfo depth_info{};
+
+    std::array<vk::DynamicState, 2> dynamic_states{};
+    dynamic_states[0] = vk::DynamicState::eViewport;
+    dynamic_states[1] = vk::DynamicState::eScissor;
+    vk::PipelineDynamicStateCreateInfo dynamic_state_info{};
+    dynamic_state_info.setDynamicStates(dynamic_states);
+
+    vk::PipelineRenderingCreateInfo rendering_info{};
+    rendering_info.setColorAttachmentFormats(attachment_format);
+
+    vk::GraphicsPipelineCreateInfo pipeline_info{};
+    pipeline_info.setLayout(g_pipelineLayout);
+    pipeline_info.setStages(stages);
+    pipeline_info.setPVertexInputState(&vertex_info);
+    pipeline_info.setPInputAssemblyState(&input_assembly_info);
+    pipeline_info.setPViewportState(&viewport_info);
+    pipeline_info.setPRasterizationState(&rasterization_info);
+    pipeline_info.setPMultisampleState(&multisample_info);
+    pipeline_info.setPColorBlendState(&color_blend_info);
+    pipeline_info.setPDepthStencilState(&depth_info);
+    pipeline_info.setPDynamicState(&dynamic_state_info);
+    pipeline_info.setPNext(&rendering_info);
+
+    g_pipeline = g_device.createGraphicsPipeline({}, pipeline_info).value;
+
+    g_device.destroy(vertex_module);
+    g_device.destroy(pixel_module);
+}
+
+static void create_buffers(const RetDrawList& draw_list)
+{
+    {
+        vk::BufferCreateInfo bufferInfo{};
+        bufferInfo.setSize(sizeof(RetDrawVert) * draw_list.vertices.size());
+        bufferInfo.setUsage(vk::BufferUsageFlagBits::eVertexBuffer);
+
+        VmaAllocationCreateInfo allocInfo{};
+        allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
+        allocInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+
+        VkBufferCreateInfo vkBufferInfo = bufferInfo;
+        VkBuffer vkBuffer;
+        vmaCreateBuffer(g_allocator, &vkBufferInfo, &allocInfo, &vkBuffer, &g_vertexBufferAlloc, nullptr);
+        g_vertexBuffer = vkBuffer;
+    }
+    {
+        vk::BufferCreateInfo bufferInfo{};
+        bufferInfo.setSize(sizeof(RetDrawIdx) * draw_list.indices.size());
+        bufferInfo.setUsage(vk::BufferUsageFlagBits::eIndexBuffer);
+
+        VmaAllocationCreateInfo allocInfo{};
+        allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
+        allocInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+
+        VkBufferCreateInfo vkBufferInfo = bufferInfo;
+        VkBuffer vkBuffer;
+        vmaCreateBuffer(g_allocator, &vkBufferInfo, &allocInfo, &vkBuffer, &g_indexBufferAlloc, nullptr);
+        g_indexBuffer = vkBuffer;
+    }
+}
+
+static void update_buffers(const RetDrawList& draw_list)
+{
+    {
+        void* mapped = nullptr;
+        vmaMapMemory(g_allocator, g_vertexBufferAlloc, &mapped);
+        std::memcpy(mapped, draw_list.vertices.data(), sizeof(RetDrawVert) * draw_list.vertices.size());
+        vmaUnmapMemory(g_allocator, g_vertexBufferAlloc);
+    }
+    {
+        void* mapped = nullptr;
+        vmaMapMemory(g_allocator, g_indexBufferAlloc, &mapped);
+        std::memcpy(mapped, draw_list.indices.data(), sizeof(RetDrawIdx) * draw_list.indices.size());
+        vmaUnmapMemory(g_allocator, g_indexBufferAlloc);
+    }
+}
+
+static void cleanup_buffers()
+{
+    vmaDestroyBuffer(g_allocator, g_vertexBuffer, g_vertexBufferAlloc);
+    vmaDestroyBuffer(g_allocator, g_indexBuffer, g_indexBufferAlloc);
+}
+
 static void cleanup_vulkan()
 {
+    cleanup_buffers();
+
+    g_device.destroy(g_pipeline);
+    g_device.destroy(g_pipelineLayout);
+
     for (auto& frame : g_frames)
     {
         g_device.destroy(frame.imageReadySemaphore);
@@ -241,6 +478,8 @@ static void cleanup_vulkan()
 
     g_device.destroy(g_cmdPool);
     g_device.destroy(g_descriptorPool);
+
+    vmaDestroyAllocator(g_allocator);
 
     g_device.destroy();
     g_instance.destroy(g_surface);
@@ -258,7 +497,40 @@ static void cleanup_vulkan_window()
     g_device.destroy(g_swapchain);
 }
 
-static void render_frame(/* RetDrawData* draw_data */)
+static void render_retgui(RetDrawData* draw_data)
+{
+    auto& frame = g_frames[g_frameIndex];
+    auto& cmd = frame.cmd;
+
+    vk::Viewport viewport(0, 0, 1600, 900, 0.0f, 1.0f);
+    cmd.setViewport(0, viewport);
+
+    vk::Rect2D scissor({ 0, 0 }, { 1600, 900 });
+    cmd.setScissor(0, scissor);
+
+    cmd.bindVertexBuffers(0, g_vertexBuffer, { 0 });
+    cmd.bindIndexBuffer(g_indexBuffer, 0, vk::IndexType::eUint16);
+
+    cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, g_pipeline);
+
+    RetVec2 scale{
+        2.0f / 1600,
+        2.0f / 900,
+    };
+    RetVec2 translate{
+        -1.0f,  // * scale.x,
+        -1.0f,  // * scale.y,
+    };
+    cmd.pushConstants(g_pipelineLayout, vk::ShaderStageFlagBits::eVertex, sizeof(RetVec2) * 0, sizeof(RetVec2), &scale.x);
+    cmd.pushConstants(g_pipelineLayout, vk::ShaderStageFlagBits::eVertex, sizeof(RetVec2) * 1, sizeof(RetVec2), &translate.x);
+
+    for (auto& draw_list : draw_data->draw_lists)
+    {
+        cmd.drawIndexed(draw_list.index_count(), 1, 0, 0, 0);
+    }
+}
+
+static void render_frame(RetDrawData* draw_data)
 {
     g_frameIndex = (g_frameIndex + 1) % g_frames.size();
     auto& frame = g_frames[g_frameIndex];
@@ -301,6 +573,8 @@ static void render_frame(/* RetDrawData* draw_data */)
     pass_info.setRenderArea(vk::Rect2D({ 0, 0 }, { 1600, 900 }));
     pass_info.setLayerCount(1);
     frame.cmd.beginRendering(pass_info);
+
+    render_retgui(draw_data);
 
     frame.cmd.endRendering();
 
@@ -374,7 +648,9 @@ int main(int /*argc*/, char** /*argv*/)
     glfwGetFramebufferSize(window, &w, &h);
     setup_vulkan_window(w, h);
 
-    // #TODO: Setup RetGui context
+    setup_vulkan_pipeline(vk::Format::eB8G8R8A8Srgb);
+
+    retgui::create_context();
 
     // #TODO: Setup Platform/Renderer backends
 
@@ -383,24 +659,33 @@ int main(int /*argc*/, char** /*argv*/)
 
     // RetVec4 clear_color = RetVec4(0.45f, 0.55f, 0.6f, 1.0f);
 
+    RetDrawData drawData{};
+    drawData.screen_width = 1600;
+    drawData.screen_height = 900;
+    auto& drawList = drawData.draw_lists.emplace_back();
+    drawList.add_rect({ 10, 10 }, { 200, 200 }, { 1.0f, 0.0f, 0.0f, 1.0f });
+    drawList.add_rect({ 1600 - 210, 10 }, { 1600 - 10, 210 }, { 0.0f, 1.0f, 0.0f, 1.0f });
+    drawList.add_rect({ 1600 * 0.5f - 100, 900 * 0.5f - 100 }, { 1600 * 0.5f + 100, 900 * 0.5f + 100 }, { 0.0f, 0.0f, 1.0f, 1.0f });
+
+    drawList.add_line({ 10, 10 }, { 1600 * 0.5f, 900 * 0.5f }, { 1, 0, 1, 1 }, 1.0f);
+
+    create_buffers(drawList);
+    update_buffers(drawList);
+
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
         // Poll & Handle events (inputs, window resize, etc.)
         glfwPollEvents();
 
-        // #TODO: Render RetGui - retgui::render();
-        // #TODO: Get RetGui draw data - retgui::get_draw_data();
-        // #TODO: Draw retgui draw data
-
-        render_frame();
+        render_frame(&drawData);
         present_frame();
     }
 
     // Cleanup
     g_device.waitIdle();
 
-    // #TODO: Shutdown RetGui context - retgui::destroy_context();
+    retgui::destroy_context();
 
     cleanup_vulkan_window();
     cleanup_vulkan();
