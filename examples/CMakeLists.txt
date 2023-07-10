@@ -1,3 +1,1 @@
-add_executable(ruic_example main.cpp)
-
-target_link_libraries(ruic_example PRIVATE ruic::ruic)
+add_subdirectory(example_glfw_opengl3)
