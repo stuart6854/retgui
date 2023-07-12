@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
-project(ruic VERSION 0.0.1 LANGUAGES CXX)
+project(ruic VERSION 0.0.1 LANGUAGES CXX C)
 
 option(RUIC_BUILD_EXAMPLES "Build the example projects" ON)
 
-add_library(ruic STATIC src/ruic.cpp)
+add_library(ruic STATIC src/ruic.cpp src/widgets.cpp)
 add_library(ruic::ruic ALIAS ruic)
 
 target_include_directories(ruic PUBLIC include)
