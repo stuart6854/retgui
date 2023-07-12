@@ -13,6 +13,8 @@ namespace ruic
 
     struct RuicContext
     {
+        Vec2 displaySize{};
+
         ElementBasePtr root{ nullptr };
         bool dirty{ true };
 

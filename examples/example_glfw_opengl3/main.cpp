@@ -193,16 +193,18 @@ void ruic_opengl_init()
 
 void ruic_opengl3_setup_render_state()
 {
+    auto* context = ruic::get_current_context();
+
     glEnable(GL_BLEND);
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_STENCIL_TEST);
 
-    glViewport(0, 0, 1280, 720);
+    glViewport(0, 0, context->displaySize.x, context->displaySize.y);
     float L = 0.0f;
-    float R = 0.0f + 1280.0f;
+    float R = 0.0f + context->displaySize.x;
     float T = 0.0f;
-    float B = 0.0f + 720.0f;
+    float B = 0.0f + context->displaySize.y;
     const float orthoProjection[4][4] = {
         { 2.0f / (R - L), 0.0f, 0.0f, 0.0f },
         { 0.0f, 2.0f / (T - B), 0.0f, 0.0f },

@@ -49,6 +49,7 @@ namespace ruic
 
     void set_root_size(std::uint32_t width, std::uint32_t height)
     {
+        g_ruic->displaySize = { float(width), float(height) };
         g_ruic->root->set_size(Dim2{ Dim{ 0.0f, float(width) }, Dim{ 0.0f, float(height) } });
         g_ruic->dirty = true;
     }
