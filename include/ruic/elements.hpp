@@ -49,6 +49,7 @@ namespace ruic
     template <typename T>
     using ElementPtr = std::shared_ptr<T>;
 
+    // https://stackoverflow.com/questions/34639447/disable-or-hide-some-parent-class-functions-in-c
     class Element : public std::enable_shared_from_this<Element>
     {
     public:
@@ -75,6 +76,9 @@ namespace ruic
         auto get_screen_size() const -> Vec2;
         auto get_bounds() const -> Rect;
 
+        auto get_color() const -> const Color& { return m_color; }
+        auto set_color(const Color& color) -> ElementBasePtr;
+
     private:
         ElementBasePtr m_parent{ nullptr };
         ElementBasePtr m_prevSibling{ nullptr };
@@ -84,6 +88,8 @@ namespace ruic
 
         Dim2 m_position{};
         Dim2 m_size{};
+
+        Color m_color{ Color::white() };
     };
 
     template <typename T>

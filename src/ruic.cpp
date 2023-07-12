@@ -61,7 +61,7 @@ namespace ruic
     void render_element(const Element* element)
     {
         const auto bounds = element->get_bounds();
-        g_ruic->drawData.drawList.add_rect(bounds.tl, bounds.br);
+        g_ruic->drawData.drawList.add_rect(bounds.tl, bounds.br, element->get_color().Int32());
 
         auto child = element->get_first_child();
         while (child != nullptr)
@@ -98,12 +98,12 @@ namespace ruic
 
     void DrawList::add_line(const Vec2& a, const Vec2& b) {}
 
-    void DrawList::add_rect(const Vec2& min, const Vec2& max)
+    void DrawList::add_rect(const Vec2& min, const Vec2& max, std::uint32_t color)
     {
-        DrawVert a{ min, { 0, 1 }, RUIC_COL32_WHITE };               // TL
-        DrawVert b{ { min.x, max.y }, { 0, 0 }, RUIC_COL32_WHITE };  // BL
-        DrawVert c{ max, { 1, 0 }, RUIC_COL32_WHITE };               // BR
-        DrawVert d{ { max.x, min.y }, { 1, 1 }, RUIC_COL32_WHITE };  // TR
+        DrawVert a{ min, { 0, 1 }, color };               // TL
+        DrawVert b{ { min.x, max.y }, { 0, 0 }, color };  // BL
+        DrawVert c{ max, { 1, 0 }, color };               // BR
+        DrawVert d{ { max.x, min.y }, { 1, 1 }, color };  // TR
 
         const auto idxOffset = VertBuffer.size();
         VertBuffer.push_back(a);

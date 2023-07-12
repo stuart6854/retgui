@@ -1,8 +1,9 @@
 #pragma once
 
+#include <cmath>
 #include <vector>
-#include <cstdint>
 #include <memory>
+#include <cstdint>
 
 namespace ruic
 {
@@ -38,15 +39,40 @@ namespace ruic
 
     using DrawIdx = std::uint32_t;
 
-#define RUIC_COL32_R_SHIFT 0
-#define RUIC_COL32_G_SHIFT 8
-#define RUIC_COL32_B_SHIFT 16
-#define RUIC_COL32_A_SHIFT 24
-#define RUIC_COL32_A_MASK 0xFF000000
+#define RUIC_COL32_R_SHIFT 0u
+#define RUIC_COL32_G_SHIFT 8u
+#define RUIC_COL32_B_SHIFT 16u
+#define RUIC_COL32_A_SHIFT 24u
 #define RUIC_COL32(R, G, B, A)                                                                 \
     (((std::uint32_t)(A) << RUIC_COL32_A_SHIFT) | ((std::uint32_t)(B) << RUIC_COL32_B_SHIFT) | \
      ((std::uint32_t)(G) << RUIC_COL32_G_SHIFT) | ((std::uint32_t)(R) << RUIC_COL32_R_SHIFT))
 #define RUIC_COL32_WHITE RUIC_COL32(255, 255, 255, 255)
+
+    static auto ColorToUInt32(float r, float g, float b, float a) -> std::uint32_t
+    {
+        auto red = std::uint32_t(std::roundf(r * 255.0f));
+        auto green = std::uint32_t(std::roundf(g * 255.0f));
+        auto blue = std::uint32_t(std::roundf(b * 255.0f));
+        auto alpha = std::uint32_t(std::roundf(a * 255.0f));
+        return RUIC_COL32(red, green, blue, alpha);
+    }
+    struct Color
+    {
+        float r;
+        float g;
+        float b;
+        float a;
+
+        Color() = default;
+        explicit Color(float r, float g, float b, float a) : r(r), g(g), b(b), a(a) {}
+        ~Color() = default;
+
+        auto Int32() const -> std::uint32_t { return ColorToUInt32(r, g, b, a); }
+
+        static auto white() -> Color { return Color{ 1, 1, 1, 1 }; }
+        static auto black() -> Color { return Color{ 0, 0, 0, 1 }; }
+        static auto transparent() -> Color { return Color{ 0, 0, 0, 0 }; }
+    };
 
     struct Vec2
     {
@@ -106,7 +132,7 @@ namespace ruic
         std::vector<DrawIdx> IdxBuffer;
 
         void add_line(const Vec2& a, const Vec2& b);
-        void add_rect(const Vec2& min, const Vec2& max);
+        void add_rect(const Vec2& min, const Vec2& max, std::uint32_t color);
     };
 
 }

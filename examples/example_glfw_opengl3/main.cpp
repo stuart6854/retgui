@@ -280,7 +280,8 @@ int main(int argc, char** argv)
                        ->set_size({ ruic::Dim{ 0.0f, 500.0f }, ruic::Dim{ 0.0f, 300.0f } });
     auto child = ruic::create_element<ruic::Element>()
                      ->set_position({ ruic::Dim(0, 5), ruic::Dim(0, 5) })
-                     ->set_size({ ruic::Dim(0.5f, 0), ruic::Dim(0.75f, 0) });
+                     ->set_size({ ruic::Dim(0.5f, 0), ruic::Dim(0.75f, 0) })
+                     ->set_color(ruic::Color(1, 0, 0, 1));
     element->add_child(child);
 
     ruic::add_to_root(element);

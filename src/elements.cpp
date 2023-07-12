@@ -101,7 +101,7 @@ namespace ruic
             auto parentPos = get_parent()->get_screen_position();
             pos += parentPos;
             auto parentSize = get_parent()->get_screen_size();
-            pos += parentSize * Vec2{ m_position.x.scale, m_position.y.scale };
+            pos += parentSize* Vec2{ m_position.x.scale, m_position.y.scale };
         }
         return pos;
     }
@@ -112,7 +112,7 @@ namespace ruic
         if (get_parent() != nullptr)
         {
             auto parentSize = get_parent()->get_screen_size();
-            size += parentSize * Vec2{ m_size.x.scale, m_size.y.scale };
+            size += parentSize* Vec2{ m_size.x.scale, m_size.y.scale };
         }
         return size;
     }
@@ -125,6 +125,13 @@ namespace ruic
         auto TL = pos;
         auto BR = TL + size;
         return { TL, BR };
+    }
+
+    auto Element::set_color(const Color& color) -> ElementBasePtr
+    {
+        m_color = color;
+        set_dirty();
+        return shared_from_this();
     }
 
 }
