@@ -31,7 +31,7 @@ namespace ruic
 
     auto Widget::add_child(const WidgetPtr& widget) -> WidgetPtr
     {
-        if(m_firstChild == nullptr)
+        if (m_firstChild == nullptr)
         {
             m_firstChild = widget;
         }
@@ -79,47 +79,47 @@ namespace ruic
         set_dirty();
     }
 
-    auto Widget::set_pos_relative(const Vec2& relativePos) -> WidgetPtr
+    auto Widget::set_position(const Dim2& position) -> WidgetPtr
     {
-        m_posRelative = relativePos;
+        m_position = position;
         set_dirty();
         return shared_from_this();
     }
 
-    auto Widget::set_pos_pixel_offset(const Vec2& pixelOffset) -> WidgetPtr
+    auto Widget::set_size(const Dim2& size) -> WidgetPtr
     {
-        m_posPixelOffset = pixelOffset;
+        m_size = size;
         set_dirty();
         return shared_from_this();
     }
 
-    auto Widget::set_size_relative(const Vec2& relativeSize) -> WidgetPtr
+    auto Widget::get_screen_position() const -> Vec2
     {
-        m_sizeRelative = relativeSize;
-        set_dirty();
-        return shared_from_this();
+        Vec2 pos = { m_position.x.offset, m_position.y.offset };
+        if (get_parent() != nullptr)
+        {
+            // #TODO: Calculate bounds from parent
+        }
+        return pos;
     }
 
-    auto Widget::set_size_pixel_offset(const Vec2& pixelOffset) -> WidgetPtr
+    auto Widget::get_screen_size() const -> Vec2
     {
-        m_sizePixelOffset = pixelOffset;
-        set_dirty();
-        return shared_from_this();
+        Vec2 size = { m_size.x.offset, m_size.y.offset };
+        if (get_parent() != nullptr)
+        {
+            // #TODO: Calculate bounds from parent
+        }
+        return size;
     }
 
     auto Widget::get_widget_bounds() const -> Rect
     {
-        Vec2 calculatedRelativePos{};
-        Vec2 calculatedRelativeSize{};
-        if (get_parent() != nullptr)
-        {
-            const auto parentBounds = get_parent()->get_widget_bounds();
-            calculatedRelativePos = parentBounds.tl;
-        }
+        Vec2 pos = get_screen_position();
+        Vec2 size = get_screen_size();
 
-        auto TL = calculatedRelativePos + m_posPixelOffset;
-        auto BR = TL + (calculatedRelativeSize + m_sizePixelOffset);
+        auto TL = pos;
+        auto BR = TL + size;
         return { TL, BR };
     }
-
 }

@@ -49,7 +49,7 @@ namespace ruic
 
     void set_root_size(std::uint32_t width, std::uint32_t height)
     {
-        g_ruic->root->set_size_pixel_offset({ float(width), float(height) });
+        g_ruic->root->set_size({ Dim{ 0.0f, float(width) }, Dim{ 0.0f, float(height) } });
         g_ruic->dirty = true;
     }
 
@@ -60,7 +60,6 @@ namespace ruic
 
     void render_widget(const Widget* widget)
     {
-        // #TODO: Render Widget
         const auto widgetBounds = widget->get_widget_bounds();
         g_ruic->drawData.drawList.add_rect(widgetBounds.tl, widgetBounds.br);
 

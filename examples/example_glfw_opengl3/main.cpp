@@ -275,7 +275,9 @@ int main(int argc, char** argv)
 
     ruic_opengl_init();
 
-    auto widget = ruic::create_widget<ruic::Widget>()->set_pos_pixel_offset({ 10.0f, 10.0f })->set_size_pixel_offset({ 500, 300 });
+    auto widget = ruic::create_widget<ruic::Widget>()
+                      ->set_position({ ruic::Dim{ 0.0f, 10.0f }, ruic::Dim{ 0.0f, 10.0f } })
+                      ->set_size({ ruic::Dim{ 0.0f, 500.0f }, ruic::Dim{ 0.0f, 300.0f } });
 
     ruic::add_to_root(widget);
 
