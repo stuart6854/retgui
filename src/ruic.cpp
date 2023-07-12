@@ -49,7 +49,7 @@ namespace ruic
 
     void set_root_size(std::uint32_t width, std::uint32_t height)
     {
-        g_ruic->root->set_size({ Dim{ 0.0f, float(width) }, Dim{ 0.0f, float(height) } });
+        g_ruic->root->set_size(Dim2{ Dim{ 0.0f, float(width) }, Dim{ 0.0f, float(height) } });
         g_ruic->dirty = true;
     }
 
@@ -94,29 +94,6 @@ namespace ruic
     auto get_draw_data() -> const RuicDrawData*
     {
         return &g_ruic->drawData;
-    }
-
-    void DrawList::add_line(const Vec2& a, const Vec2& b) {}
-
-    void DrawList::add_rect(const Vec2& min, const Vec2& max, std::uint32_t color)
-    {
-        DrawVert a{ min, { 0, 1 }, color };               // TL
-        DrawVert b{ { min.x, max.y }, { 0, 0 }, color };  // BL
-        DrawVert c{ max, { 1, 0 }, color };               // BR
-        DrawVert d{ { max.x, min.y }, { 1, 1 }, color };  // TR
-
-        const auto idxOffset = VertBuffer.size();
-        VertBuffer.push_back(a);
-        VertBuffer.push_back(b);
-        VertBuffer.push_back(c);
-        VertBuffer.push_back(d);
-
-        IdxBuffer.push_back(idxOffset + 0);
-        IdxBuffer.push_back(idxOffset + 1);
-        IdxBuffer.push_back(idxOffset + 2);
-        IdxBuffer.push_back(idxOffset + 2);
-        IdxBuffer.push_back(idxOffset + 3);
-        IdxBuffer.push_back(idxOffset + 0);
     }
 
 }

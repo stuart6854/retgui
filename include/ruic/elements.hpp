@@ -7,43 +7,6 @@
 
 namespace ruic
 {
-    /*
-     * Used for positioning and sizing of Elements
-     * Inspired by CEGUI.
-     */
-    struct Dim
-    {
-        float scale{};   // Percentage of parents size
-        float offset{};  // Pixel offset
-
-        Dim() = default;
-        explicit Dim(float scale, float offset) : scale(scale), offset(offset) {}
-        Dim(const Dim& other) : Dim(other.scale, other.offset) {}
-
-        auto operator+(const Dim& rhs) const -> Dim;
-        auto operator-(const Dim& rhs) const -> Dim;
-        auto operator*(const Dim& rhs) const -> Dim;
-        auto operator/(const Dim& rhs) const -> Dim;
-
-        auto operator+=(const Dim& rhs) -> const Dim&;
-        auto operator-=(const Dim& rhs) -> const Dim&;
-        auto operator*=(const Dim& rhs) -> const Dim&;
-        auto operator/=(const Dim& rhs) -> const Dim&;
-
-        bool operator==(const Dim& rhs) const { return scale == rhs.scale && offset == rhs.offset; }
-        bool operator!=(const Dim& rhs) const { return !(*this == rhs); }
-
-        static auto zero() -> Dim { return Dim{ 0, 0 }; }
-        static auto relative() -> Dim { return Dim{ 1, 0 }; }
-        static auto percent() -> Dim { return Dim{ 0.01f, 0 }; }
-        static auto pixel() -> Dim { return Dim{ 0, 1 }; }
-    };
-    struct Dim2
-    {
-        Dim x{};
-        Dim y{};
-    };
-
     class Element;
 
     template <typename T>
