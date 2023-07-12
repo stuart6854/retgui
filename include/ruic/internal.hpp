@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ruic/widgets.hpp"
+#include "ruic/elements.hpp"
 
 #include <vector>
 
@@ -13,7 +13,7 @@ namespace ruic
 
     struct RuicContext
     {
-        WidgetPtr root{ nullptr };
+        ElementBasePtr root{ nullptr };
         bool dirty{ true };
 
         RuicDrawData drawData{};

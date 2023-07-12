@@ -20,11 +20,14 @@ namespace ruic
     auto get_current_context() -> RuicContext*;
     void set_current_context(RuicContext* ctx);
 
-    class Widget;
-    using WidgetPtr = std::shared_ptr<Widget>;
+    class Element;
 
-    void add_to_root(const WidgetPtr& widget);
-    void remove_from_root(const WidgetPtr& widget);
+    template <typename T>
+    using ElementPtr = std::shared_ptr<T>;
+    using ElementBasePtr = ElementPtr<Element>;
+
+    void add_to_root(const ElementBasePtr& element);
+    void remove_from_root(const ElementBasePtr& element);
 
     void set_root_size(std::uint32_t width, std::uint32_t height);
 

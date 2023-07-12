@@ -3,7 +3,7 @@ project(ruic VERSION 0.0.1 LANGUAGES CXX C)
 
 option(RUIC_BUILD_EXAMPLES "Build the example projects" ON)
 
-add_library(ruic STATIC src/ruic.cpp src/widgets.cpp)
+add_library(ruic STATIC src/ruic.cpp src/elements.cpp)
 add_library(ruic::ruic ALIAS ruic)
 
 target_include_directories(ruic PUBLIC include)

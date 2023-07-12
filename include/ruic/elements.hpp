@@ -8,7 +8,7 @@
 namespace ruic
 {
     /*
-     * Used for positioning and sizing of Widgets
+     * Used for positioning and sizing of Elements
      * Inspired by CEGUI.
      */
     struct Dim
@@ -44,50 +44,52 @@ namespace ruic
         Dim y{};
     };
 
-    class Widget;
-    using WidgetPtr = std::shared_ptr<Widget>;
+    class Element;
 
-    class Widget : public std::enable_shared_from_this<Widget>
+    template <typename T>
+    using ElementPtr = std::shared_ptr<T>;
+
+    class Element : public std::enable_shared_from_this<Element>
     {
     public:
-        Widget() = default;
-        ~Widget() = default;
+        Element() = default;
+        ~Element() = default;
 
-        auto get_parent() const -> WidgetPtr;
-        auto get_prev_sibling() const -> WidgetPtr;
-        auto get_next_sibling() const -> WidgetPtr;
-        auto get_first_child() const -> WidgetPtr;
-        auto get_last_child() const -> WidgetPtr;
+        auto get_parent() const -> ElementBasePtr;
+        auto get_prev_sibling() const -> ElementBasePtr;
+        auto get_next_sibling() const -> ElementBasePtr;
+        auto get_first_child() const -> ElementBasePtr;
+        auto get_last_child() const -> ElementBasePtr;
 
-        auto add_child(const WidgetPtr& widget) -> WidgetPtr;
-        auto add_child(Widget& widget) -> WidgetPtr;
-        void remove_child(const WidgetPtr& widget);
+        auto add_child(const ElementBasePtr& element) -> ElementBasePtr;
+        auto add_child(Element& element) -> ElementBasePtr;
+        void remove_child(const ElementBasePtr& element);
 
         auto get_position() const -> const Dim2& { return m_position; }
         auto get_size() const -> const Dim2& { return m_size; }
 
-        auto set_position(const Dim2& position) -> WidgetPtr;
-        auto set_size(const Dim2& size) -> WidgetPtr;
+        auto set_position(const Dim2& position) -> ElementBasePtr;
+        auto set_size(const Dim2& size) -> ElementBasePtr;
 
         auto get_screen_position() const -> Vec2;
         auto get_screen_size() const -> Vec2;
-        auto get_widget_bounds() const -> Rect;
+        auto get_bounds() const -> Rect;
 
     private:
-        WidgetPtr m_parent{ nullptr };
-        WidgetPtr m_prevSibling{ nullptr };
-        WidgetPtr m_nextSibling{ nullptr };
-        WidgetPtr m_firstChild{ nullptr };
-        WidgetPtr m_lastChild{ nullptr };
+        ElementBasePtr m_parent{ nullptr };
+        ElementBasePtr m_prevSibling{ nullptr };
+        ElementBasePtr m_nextSibling{ nullptr };
+        ElementBasePtr m_firstChild{ nullptr };
+        ElementBasePtr m_lastChild{ nullptr };
 
         Dim2 m_position{};
         Dim2 m_size{};
     };
 
     template <typename T>
-    auto create_widget() -> WidgetPtr
+    auto create_element() -> ElementPtr<T>
     {
-        static_assert(std::is_base_of<Widget, T>::value, "T must derive from Widget.");
+        static_assert(std::is_base_of<Element, T>::value, "T must derive from Element.");
         return std::make_shared<T>();
     }
 }

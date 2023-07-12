@@ -1,62 +1,62 @@
-#include "ruic/widgets.hpp"
+#include "ruic/elements.hpp"
 
 #include "ruic/ruic.hpp"
 
 namespace ruic
 {
-    auto Widget::get_parent() const -> WidgetPtr
+    auto Element::get_parent() const -> ElementBasePtr
     {
         return m_parent;
     }
 
-    auto Widget::get_prev_sibling() const -> WidgetPtr
+    auto Element::get_prev_sibling() const -> ElementBasePtr
     {
         return m_prevSibling;
     }
 
-    auto Widget::get_next_sibling() const -> WidgetPtr
+    auto Element::get_next_sibling() const -> ElementBasePtr
     {
         return m_nextSibling;
     }
 
-    auto Widget::get_first_child() const -> WidgetPtr
+    auto Element::get_first_child() const -> ElementBasePtr
     {
         return m_firstChild;
     }
 
-    auto Widget::get_last_child() const -> WidgetPtr
+    auto Element::get_last_child() const -> ElementBasePtr
     {
         return m_lastChild;
     }
 
-    auto Widget::add_child(const WidgetPtr& widget) -> WidgetPtr
+    auto Element::add_child(const ElementBasePtr& element) -> ElementBasePtr
     {
         if (m_firstChild == nullptr)
         {
-            m_firstChild = widget;
+            m_firstChild = element;
         }
         if (m_lastChild != nullptr)
         {
-            m_lastChild->m_nextSibling = widget;
+            m_lastChild->m_nextSibling = element;
         }
 
-        widget->m_prevSibling = m_lastChild;
-        m_lastChild = widget;
-        widget->m_parent = shared_from_this();
+        element->m_prevSibling = m_lastChild;
+        m_lastChild = element;
+        element->m_parent = shared_from_this();
 
         set_dirty();
         return shared_from_this();
     }
 
-    auto Widget::add_child(Widget& widget) -> WidgetPtr
+    auto Element::add_child(Element& element) -> ElementBasePtr
     {
-        return add_child(widget.shared_from_this());
+        return add_child(element.shared_from_this());
     }
 
-    void Widget::remove_child(const WidgetPtr& widget)
+    void Element::remove_child(const ElementBasePtr& element)
     {
         auto childPtr = m_firstChild;
-        while (childPtr != nullptr && childPtr != widget)
+        while (childPtr != nullptr && childPtr != element)
         {
             childPtr = childPtr->m_nextSibling;
         }
@@ -79,21 +79,21 @@ namespace ruic
         set_dirty();
     }
 
-    auto Widget::set_position(const Dim2& position) -> WidgetPtr
+    auto Element::set_position(const Dim2& position) -> ElementBasePtr
     {
         m_position = position;
         set_dirty();
         return shared_from_this();
     }
 
-    auto Widget::set_size(const Dim2& size) -> WidgetPtr
+    auto Element::set_size(const Dim2& size) -> ElementBasePtr
     {
         m_size = size;
         set_dirty();
         return shared_from_this();
     }
 
-    auto Widget::get_screen_position() const -> Vec2
+    auto Element::get_screen_position() const -> Vec2
     {
         Vec2 pos = { m_position.x.offset, m_position.y.offset };
         if (get_parent() != nullptr)
@@ -103,7 +103,7 @@ namespace ruic
         return pos;
     }
 
-    auto Widget::get_screen_size() const -> Vec2
+    auto Element::get_screen_size() const -> Vec2
     {
         Vec2 size = { m_size.x.offset, m_size.y.offset };
         if (get_parent() != nullptr)
@@ -113,7 +113,7 @@ namespace ruic
         return size;
     }
 
-    auto Widget::get_widget_bounds() const -> Rect
+    auto Element::get_bounds() const -> Rect
     {
         Vec2 pos = get_screen_position();
         Vec2 size = get_screen_size();

@@ -1,5 +1,5 @@
 #include <ruic/ruic.hpp>
-#include <ruic/widgets.hpp>
+#include <ruic/elements.hpp>
 #include <ruic/internal.hpp>
 
 #define GLFW_INCLUDE_NONE
@@ -275,11 +275,11 @@ int main(int argc, char** argv)
 
     ruic_opengl_init();
 
-    auto widget = ruic::create_widget<ruic::Widget>()
+    auto element = ruic::create_element<ruic::Element>()
                       ->set_position({ ruic::Dim{ 0.0f, 10.0f }, ruic::Dim{ 0.0f, 10.0f } })
                       ->set_size({ ruic::Dim{ 0.0f, 500.0f }, ruic::Dim{ 0.0f, 300.0f } });
 
-    ruic::add_to_root(widget);
+    ruic::add_to_root(element);
 
     while (!glfwWindowShouldClose(window))
     {

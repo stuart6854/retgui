@@ -10,7 +10,7 @@ namespace ruic
         auto* ctx = new RuicContext;
         set_current_context(ctx);
 
-        ctx->root = create_widget<Widget>();
+        ctx->root = create_element<Element>();
 
         return ctx;
     }
@@ -37,14 +37,14 @@ namespace ruic
         g_ruic = ctx;
     }
 
-    void add_to_root(const WidgetPtr& widget)
+    void add_to_root(const ElementBasePtr& element)
     {
-        g_ruic->root->add_child(widget);
+        g_ruic->root->add_child(element);
     }
 
-    void remove_from_root(const WidgetPtr& widget)
+    void remove_from_root(const ElementBasePtr& element)
     {
-        g_ruic->root->remove_child(widget);
+        g_ruic->root->remove_child(element);
     }
 
     void set_root_size(std::uint32_t width, std::uint32_t height)
@@ -58,15 +58,15 @@ namespace ruic
         g_ruic->dirty = true;
     }
 
-    void render_widget(const Widget* widget)
+    void render_element(const Element* element)
     {
-        const auto widgetBounds = widget->get_widget_bounds();
-        g_ruic->drawData.drawList.add_rect(widgetBounds.tl, widgetBounds.br);
+        const auto bounds = element->get_bounds();
+        g_ruic->drawData.drawList.add_rect(bounds.tl, bounds.br);
 
-        auto child = widget->get_first_child();
+        auto child = element->get_first_child();
         while (child != nullptr)
         {
-            render_widget(child.get());
+            render_element(child.get());
             child = child->get_next_sibling();
         }
     }
@@ -83,7 +83,7 @@ namespace ruic
         auto child = g_ruic->root->get_first_child();
         while (child != nullptr)
         {
-            render_widget(child.get());
+            render_element(child.get());
             child = child->get_next_sibling();
         }
 
