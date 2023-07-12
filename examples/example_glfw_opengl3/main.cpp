@@ -286,6 +286,12 @@ int main(int argc, char** argv)
 
     ruic::add_to_root(element);
 
+    auto trElement = ruic::create_element<ruic::Element>()
+                         ->set_position(ruic::Dim2{ ruic::Dim{ .75f, -5 }, ruic::Dim{ 0, 5 } })
+                         ->set_size(ruic::Dim2{ ruic::Dim{ .25f, 0 }, ruic::Dim{ .4f, 0 } })
+                         ->set_color(ruic::Color{ 0, 1, 0, 1 });
+    ruic::add_to_root(trElement);
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -299,7 +305,8 @@ int main(int argc, char** argv)
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // #TODO: Render here
+        ruic::set_root_size(displayWidth, displayHeight);
+
         ruic::render();
         ruic_opengl3_render(ruic::get_draw_data());
 
