@@ -276,8 +276,12 @@ int main(int argc, char** argv)
     ruic_opengl_init();
 
     auto element = ruic::create_element<ruic::Element>()
-                      ->set_position({ ruic::Dim{ 0.0f, 10.0f }, ruic::Dim{ 0.0f, 10.0f } })
-                      ->set_size({ ruic::Dim{ 0.0f, 500.0f }, ruic::Dim{ 0.0f, 300.0f } });
+                       ->set_position({ ruic::Dim{ 0.0f, 10.0f }, ruic::Dim{ 0.0f, 10.0f } })
+                       ->set_size({ ruic::Dim{ 0.0f, 500.0f }, ruic::Dim{ 0.0f, 300.0f } });
+    auto child = ruic::create_element<ruic::Element>()
+                     ->set_position({ ruic::Dim(0, 5), ruic::Dim(0, 5) })
+                     ->set_size({ ruic::Dim(0.5f, 0), ruic::Dim(0.75f, 0) });
+    element->add_child(child);
 
     ruic::add_to_root(element);
 

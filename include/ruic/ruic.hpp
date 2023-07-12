@@ -57,6 +57,31 @@ namespace ruic
         auto operator-(const Vec2& rhs) const -> Vec2 { return { x - rhs.x, y - rhs.y }; }
         auto operator*(const Vec2& rhs) const -> Vec2 { return { x * rhs.x, y * rhs.y }; }
         auto operator/(const Vec2& rhs) const -> Vec2 { return { x / rhs.x, y / rhs.y }; }
+
+        auto operator+=(const Vec2& rhs) -> const Vec2&
+        {
+            x = x + rhs.x;
+            y = y + rhs.y;
+            return *this;
+        }
+        auto operator-=(const Vec2& rhs) -> const Vec2&
+        {
+            x = x - rhs.x;
+            y = y - rhs.y;
+            return *this;
+        }
+        auto operator*=(const Vec2& rhs) -> const Vec2&
+        {
+            x = x * rhs.x;
+            y = y * rhs.y;
+            return *this;
+        }
+        auto operator/=(const Vec2& rhs) -> const Vec2&
+        {
+            x = x / rhs.x;
+            y = y / rhs.y;
+            return *this;
+        }
     };
 
     struct Rect

@@ -98,7 +98,10 @@ namespace ruic
         Vec2 pos = { m_position.x.offset, m_position.y.offset };
         if (get_parent() != nullptr)
         {
-            // #TODO: Calculate bounds from parent
+            auto parentPos = get_parent()->get_screen_position();
+            pos += parentPos;
+            auto parentSize = get_parent()->get_screen_size();
+            pos += parentSize * Vec2{ m_position.x.scale, m_position.y.scale };
         }
         return pos;
     }
@@ -108,7 +111,8 @@ namespace ruic
         Vec2 size = { m_size.x.offset, m_size.y.offset };
         if (get_parent() != nullptr)
         {
-            // #TODO: Calculate bounds from parent
+            auto parentSize = get_parent()->get_screen_size();
+            size += parentSize * Vec2{ m_size.x.scale, m_size.y.scale };
         }
         return size;
     }
@@ -122,4 +126,5 @@ namespace ruic
         auto BR = TL + size;
         return { TL, BR };
     }
+
 }
