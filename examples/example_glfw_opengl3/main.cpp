@@ -1,6 +1,6 @@
-#include <ruic/ruic.hpp>
-#include <ruic/elements.hpp>
-#include <ruic/internal.hpp>
+#include <retgui/retgui.hpp>
+#include <retgui/elements.hpp>
+#include <retgui/internal.hpp>
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -112,7 +112,7 @@ struct DrawData
 };
 static DrawData g_oglDrawData{};
 
-void ruic_opengl_init()
+void retgui_opengl_init()
 {
     glGenVertexArrays(1, &g_oglDrawData.vao);
     glBindVertexArray(g_oglDrawData.vao);
@@ -120,11 +120,11 @@ void ruic_opengl_init()
     glGenBuffers(1, &g_oglDrawData.vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, g_oglDrawData.vertexBuffer);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ruic::DrawVert), (void*)offsetof(ruic::DrawVert, pos));
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(retgui::DrawVert), (void*)offsetof(retgui::DrawVert, pos));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ruic::DrawVert), (void*)offsetof(ruic::DrawVert, uv));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(retgui::DrawVert), (void*)offsetof(retgui::DrawVert, uv));
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ruic::DrawVert), (void*)offsetof(ruic::DrawVert, col));
+    glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(retgui::DrawVert), (void*)offsetof(retgui::DrawVert, col));
 
     glGenBuffers(1, &g_oglDrawData.indexBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_oglDrawData.indexBuffer);
@@ -191,9 +191,9 @@ void ruic_opengl_init()
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void ruic_opengl3_setup_render_state()
+void retgui_opengl3_setup_render_state()
 {
-    auto* context = ruic::get_current_context();
+    auto* context = retgui::get_current_context();
 
     glEnable(GL_BLEND);
     glDisable(GL_CULL_FACE);
@@ -218,9 +218,9 @@ void ruic_opengl3_setup_render_state()
     glBindVertexArray(g_oglDrawData.vao);
 }
 
-void ruic_opengl3_render(const ruic::RuicDrawData* drawData)
+void retgui_opengl3_render(const retgui::RetGuiDrawData* drawData)
 {
-    const auto vertexSize = drawData->drawList.VertBuffer.size() * sizeof(ruic::DrawVert);
+    const auto vertexSize = drawData->drawList.VertBuffer.size() * sizeof(retgui::DrawVert);
     glBindBuffer(GL_ARRAY_BUFFER, g_oglDrawData.vertexBuffer);
     if (g_oglDrawData.vertexBufferSize < vertexSize)
     {
@@ -229,7 +229,7 @@ void ruic_opengl3_render(const ruic::RuicDrawData* drawData)
     }
     glBufferSubData(GL_ARRAY_BUFFER, 0, vertexSize, drawData->drawList.VertBuffer.data());
 
-    const auto indexSize = drawData->drawList.IdxBuffer.size() * sizeof(ruic::DrawIdx);
+    const auto indexSize = drawData->drawList.IdxBuffer.size() * sizeof(retgui::DrawIdx);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_oglDrawData.indexBuffer);
     if (g_oglDrawData.indexBufferSize < indexSize)
     {
@@ -238,7 +238,7 @@ void ruic_opengl3_render(const ruic::RuicDrawData* drawData)
     }
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexSize, drawData->drawList.IdxBuffer.data());
 
-    ruic_opengl3_setup_render_state();
+    retgui_opengl3_setup_render_state();
 
     glBindTexture(GL_TEXTURE_2D, g_oglDrawData.whiteTexture);
 
@@ -255,7 +255,7 @@ int main(int argc, char** argv)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
-    auto* window = glfwCreateWindow(1280, 720, "RUIC GLFW+OpenGL3 example", nullptr, nullptr);
+    auto* window = glfwCreateWindow(1280, 720, "RetGui GLFW+OpenGL3 example", nullptr, nullptr);
     if (window == nullptr)
     {
         return 1;
@@ -273,26 +273,25 @@ int main(int argc, char** argv)
     glDebugMessageCallback(glDebugOutput, nullptr);
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
-    ruic::create_context();
+    retgui::create_context();
 
-    ruic_opengl_init();
+    retgui_opengl_init();
 
-    auto element = ruic::create_element<ruic::Element>()
-                       ->set_position(ruic::Dim2{ ruic::Dim{ 0.0f, 10.0f }, ruic::Dim{ 0.0f, 10.0f } })
-                       ->set_size(ruic::Dim2{ ruic::Dim{ 0.0f, 500.0f }, ruic::Dim{ 0.0f, 300.0f } });
-    auto child = ruic::create_element<ruic::Element>()
-                     ->set_position(ruic::Dim2{ ruic::Dim(0, 5), ruic::Dim(0, 5) })
-                     ->set_size(ruic::Dim2{ ruic::Dim(0.5f, 0), ruic::Dim(0.75f, 0) })
-                     ->set_color(ruic::Color(1, 0, 0, 1));
+    auto element = retgui::create_element<retgui::Element>()
+                       ->set_position(retgui::Dim2{ retgui::Dim{ 0.0f, 10.0f }, retgui::Dim{ 0.0f, 10.0f } })
+                       ->set_size(retgui::Dim2{ retgui::Dim{ 0.0f, 500.0f }, retgui::Dim{ 0.0f, 300.0f } });
+    auto child = retgui::create_element<retgui::Element>()
+                     ->set_position(retgui::Dim2{ retgui::Dim(0, 5), retgui::Dim(0, 5) })
+                     ->set_size(retgui::Dim2{ retgui::Dim(0.5f, 0), retgui::Dim(0.75f, 0) })
+                     ->set_color(retgui::Color(1, 0, 0, 1));
     element->add_child(child);
+    retgui::add_to_root(element);
 
-    ruic::add_to_root(element);
-
-    auto trElement = ruic::create_element<ruic::Element>()
-                         ->set_position(ruic::Dim2{ ruic::Dim{ .75f, -5 }, ruic::Dim{ 0, 5 } })
-                         ->set_size(ruic::Dim2{ ruic::Dim{ .25f, 0 }, ruic::Dim{ .4f, 0 } })
-                         ->set_color(ruic::Color{ 0, 1, 0, 1 });
-    ruic::add_to_root(trElement);
+    auto trElement = retgui::create_element<retgui::Element>()
+                         ->set_position(retgui::Dim2{ retgui::Dim{ .75f, -5 }, retgui::Dim{ 0, 5 } })
+                         ->set_size(retgui::Dim2{ retgui::Dim{ .25f, 0 }, retgui::Dim{ .4f, 0 } })
+                         ->set_color(retgui::Color{ 0, 1, 0, 1 });
+    retgui::add_to_root(trElement);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -307,15 +306,15 @@ int main(int argc, char** argv)
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        ruic::set_root_size(displayWidth, displayHeight);
+        retgui::set_root_size(displayWidth, displayHeight);
 
-        ruic::render();
-        ruic_opengl3_render(ruic::get_draw_data());
+        retgui::render();
+        retgui_opengl3_render(retgui::get_draw_data());
 
         glfwSwapBuffers(window);
     }
 
-    ruic::destroy_context();
+    retgui::destroy_context();
 
     glfwDestroyWindow(window);
     glfwTerminate();

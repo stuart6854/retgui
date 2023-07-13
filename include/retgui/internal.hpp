@@ -1,23 +1,23 @@
 #pragma once
 
-#include "ruic/elements.hpp"
+#include "retgui/elements.hpp"
 
 #include <vector>
 
-namespace ruic
+namespace retgui
 {
-    struct RuicDrawData
+    struct RetGuiDrawData
     {
         DrawList drawList{};
     };
 
-    struct RuicContext
+    struct RetGuiContext
     {
         Vec2 displaySize{};
 
         ElementBasePtr root{ nullptr };
         bool dirty{ true };
 
-        RuicDrawData drawData{};
+        RetGuiDrawData drawData{};
     };
 }

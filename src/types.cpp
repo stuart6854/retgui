@@ -1,6 +1,6 @@
-#include "ruic/types.hpp"
+#include "retgui/types.hpp"
 
-namespace ruic
+namespace retgui
 {
     auto ColorToUInt32(float r, float g, float b, float a) -> U32
     {
@@ -8,7 +8,7 @@ namespace ruic
         auto green = U32(std::roundf(g * 255.0f));
         auto blue = U32(std::roundf(b * 255.0f));
         auto alpha = U32(std::roundf(a * 255.0f));
-        return RUIC_COL32(red, green, blue, alpha);
+        return RETGUI_COL32(red, green, blue, alpha);
     }
 
     auto Dim::operator+(const Dim& rhs) const -> Dim

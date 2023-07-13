@@ -1,8 +1,8 @@
-#include "ruic/elements.hpp"
+#include "retgui/elements.hpp"
 
-#include "ruic/ruic.hpp"
+#include "retgui/retgui.hpp"
 
-namespace ruic
+namespace retgui
 {
     auto Element::get_parent() const -> ElementBasePtr
     {

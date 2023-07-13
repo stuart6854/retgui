@@ -1,11 +1,11 @@
 #pragma once
 
-#include "ruic.hpp"
+#include "retgui.hpp"
 
 #include <memory>
 #include <type_traits>
 
-namespace ruic
+namespace retgui
 {
     class Element;
 

@@ -7,21 +7,21 @@
 #include <memory>
 #include <cstdint>
 
-namespace ruic
+namespace retgui
 {
     // ----------------------------------------------------
     // Forward Declarations
     // ----------------------------------------------------
-    struct RuicContext;
-    struct RuicDrawData;
+    struct RetGuiContext;
+    struct RetGuiDrawData;
 
     // ----------------------------------------------------
     // Context creation and access
     // ----------------------------------------------------
-    auto create_context() -> RuicContext*;
-    void destroy_context(RuicContext* ctx = nullptr);
-    auto get_current_context() -> RuicContext*;
-    void set_current_context(RuicContext* ctx);
+    auto create_context() -> RetGuiContext*;
+    void destroy_context(RetGuiContext* ctx = nullptr);
+    auto get_current_context() -> RetGuiContext*;
+    void set_current_context(RetGuiContext* ctx);
 
     class Element;
 
@@ -37,6 +37,6 @@ namespace ruic
     void set_dirty();
 
     bool render();  // Returns TRUE if render data changed
-    auto get_draw_data() -> const RuicDrawData*;
+    auto get_draw_data() -> const RetGuiDrawData*;
 
 }

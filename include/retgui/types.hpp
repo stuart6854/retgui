@@ -4,20 +4,20 @@
 #include <vector>
 #include <cstdint>
 
-namespace ruic
+namespace retgui
 {
     using U32 = std::uint32_t;
 
     using DrawIdx = U32;
 
-#define RUIC_COL32_R_SHIFT 0u
-#define RUIC_COL32_G_SHIFT 8u
-#define RUIC_COL32_B_SHIFT 16u
-#define RUIC_COL32_A_SHIFT 24u
-#define RUIC_COL32(R, G, B, A)                                                                                \
-    (((U32)(A) << RUIC_COL32_A_SHIFT) | ((U32)(B) << RUIC_COL32_B_SHIFT) | ((U32)(G) << RUIC_COL32_G_SHIFT) | \
-     ((U32)(R) << RUIC_COL32_R_SHIFT))
-#define RUIC_COL32_WHITE RUIC_COL32(255, 255, 255, 255)
+#define RETGUI_COL32_R_SHIFT 0u
+#define RETGUI_COL32_G_SHIFT 8u
+#define RETGUI_COL32_B_SHIFT 16u
+#define RETGUI_COL32_A_SHIFT 24u
+#define RETGUI_COL32(R, G, B, A)                                                                                    \
+    (((U32)(A) << RETGUI_COL32_A_SHIFT) | ((U32)(B) << RETGUI_COL32_B_SHIFT) | ((U32)(G) << RETGUI_COL32_G_SHIFT) | \
+     ((U32)(R) << RETGUI_COL32_R_SHIFT))
+#define RUIC_COL32_WHITE RETGUI_COL32(255, 255, 255, 255)
 
     auto ColorToUInt32(float r, float g, float b, float a) -> U32;
 
