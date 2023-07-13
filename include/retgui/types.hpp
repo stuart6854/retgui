@@ -6,6 +6,7 @@
 
 namespace retgui
 {
+    using U8 = std::uint8_t;
     using U32 = std::uint32_t;
 
     using DrawIdx = U32;

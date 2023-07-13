@@ -1,12 +1,17 @@
 #pragma once
 
 #include "retgui.hpp"
+#include "types.hpp"
 
 #include <memory>
 #include <type_traits>
 
 namespace retgui
 {
+#define RETGUI_ELEMENT_STATE_HOVERED U8(1u << 0u)  // 1
+#define RETGUI_ELEMENT_STATE_FOCUSED U8(1u << 1u)  // 2
+#define RETGUI_ELEMENT_STATE_ACTIVE U8(1u << 2u)   // 4
+
     class Element;
 
     template <typename T>
@@ -40,7 +45,15 @@ namespace retgui
         auto get_bounds() const -> Rect;
 
         auto get_color() const -> const Color& { return m_color; }
+        auto get_hovered_color() const -> const Color& { return m_hoveredColor; }
         auto set_color(const Color& color) -> ElementBasePtr;
+        auto set_hovered_color(const Color& color) -> ElementBasePtr;
+
+        auto get_render_color() const -> const Color&;
+
+        auto get_state() const -> U8;
+        void add_state(U8 state);
+        void remove_state(U8 state);
 
     private:
         ElementBasePtr m_parent{ nullptr };
@@ -53,6 +66,9 @@ namespace retgui
         Dim2 m_size{};
 
         Color m_color{ Color::white() };
+        Color m_hoveredColor{ m_color };
+
+        U8 m_state{};
     };
 
     template <typename T>

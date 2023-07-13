@@ -1,5 +1,6 @@
 #include <retgui/retgui.hpp>
 #include <retgui/elements.hpp>
+#include <retgui/io.hpp>
 #include <retgui/internal.hpp>
 
 #define GLFW_INCLUDE_NONE
@@ -14,6 +15,11 @@
 void error_callback(int error, const char* description)
 {
     fprintf(stderr, "Error: %s\n", description);
+}
+
+void glfwCursorPosCallback(GLFWwindow* window, double x, double y)
+{
+    retgui::trickle_cursor_pos({ float(x), float(y) });
 }
 
 void APIENTRY
@@ -263,6 +269,8 @@ int main(int argc, char** argv)
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);  // VSync
 
+    glfwSetCursorPosCallback(window, glfwCursorPosCallback);
+
     if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
     {
         return 1;
@@ -279,18 +287,21 @@ int main(int argc, char** argv)
 
     auto element = retgui::create_element<retgui::Element>()
                        ->set_position(retgui::Dim2{ retgui::Dim{ 0.0f, 10.0f }, retgui::Dim{ 0.0f, 10.0f } })
-                       ->set_size(retgui::Dim2{ retgui::Dim{ 0.0f, 500.0f }, retgui::Dim{ 0.0f, 300.0f } });
+                       ->set_size(retgui::Dim2{ retgui::Dim{ 0.0f, 500.0f }, retgui::Dim{ 0.0f, 300.0f } })
+                       ->set_hovered_color(retgui::Color(0.8f, 0.8f, 0.8f, 1));
     auto child = retgui::create_element<retgui::Element>()
                      ->set_position(retgui::Dim2{ retgui::Dim(0, 5), retgui::Dim(0, 5) })
                      ->set_size(retgui::Dim2{ retgui::Dim(0.5f, 0), retgui::Dim(0.75f, 0) })
-                     ->set_color(retgui::Color(1, 0, 0, 1));
+                     ->set_color(retgui::Color(1, 0, 0, 1))
+                     ->set_hovered_color(retgui::Color(0.4f, 0.1f, 0.1f, 1));
     element->add_child(child);
     retgui::add_to_root(element);
 
     auto trElement = retgui::create_element<retgui::Element>()
                          ->set_position(retgui::Dim2{ retgui::Dim{ .75f, -5 }, retgui::Dim{ 0, 5 } })
                          ->set_size(retgui::Dim2{ retgui::Dim{ .25f, 0 }, retgui::Dim{ .4f, 0 } })
-                         ->set_color(retgui::Color{ 0, 1, 0, 1 });
+                         ->set_color(retgui::Color{ 0, 1, 0, 1 })
+                         ->set_hovered_color(retgui::Color(0.1f, 0.8f, 0.1f, 1));
     retgui::add_to_root(trElement);
 
     while (!glfwWindowShouldClose(window))

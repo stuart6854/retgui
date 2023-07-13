@@ -134,4 +134,36 @@ namespace retgui
         return shared_from_this();
     }
 
+    auto Element::set_hovered_color(const Color& color) -> ElementBasePtr
+    {
+        m_hoveredColor = color;
+        set_dirty();
+        return shared_from_this();
+    }
+
+    auto Element::get_render_color() const -> const Color&
+    {
+        if (m_state & RETGUI_ELEMENT_STATE_HOVERED)
+            return m_hoveredColor;
+
+        return m_color;
+    }
+
+    auto Element::get_state() const -> U8
+    {
+        return m_state;
+    }
+
+    void Element::add_state(U8 state)
+    {
+        m_state |= state;
+        set_dirty();
+    }
+
+    void Element::remove_state(U8 state)
+    {
+        m_state &= ~state;
+        set_dirty();
+    }
+
 }

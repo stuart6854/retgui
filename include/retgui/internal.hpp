@@ -18,6 +18,9 @@ namespace retgui
         ElementBasePtr root{ nullptr };
         bool dirty{ true };
 
+        Element* lastHoveredElement{ nullptr };
+        Element* lastFocusedElement{ nullptr };
+
         RetGuiDrawData drawData{};
     };
 }
