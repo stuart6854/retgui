@@ -134,17 +134,17 @@ namespace retgui
         return shared_from_this();
     }
 
-    auto Element::set_hovered_color(const Color& color) -> ElementBasePtr
-    {
-        m_hoveredColor = color;
-        set_dirty();
-        return shared_from_this();
-    }
-
     auto Element::get_render_color() const -> const Color&
     {
+        if (m_state & RETGUI_ELEMENT_STATE_ACTIVE)
+        {
+            return m_activeColor;
+        }
+
         if (m_state & RETGUI_ELEMENT_STATE_HOVERED)
+        {
             return m_hoveredColor;
+        }
 
         return m_color;
     }
@@ -164,6 +164,30 @@ namespace retgui
     {
         m_state &= ~state;
         set_dirty();
+    }
+
+    auto Element::set_hovered_color(const Color& color) -> ElementBasePtr
+    {
+        m_hoveredColor = color;
+        set_dirty();
+        return shared_from_this();
+    }
+
+    auto Element::set_active_color(const Color& color) -> ElementBasePtr
+    {
+        m_activeColor = color;
+        set_dirty();
+        return shared_from_this();
+    }
+
+    void Button::set_on_clicked(std::function<void()>&& callback)
+    {
+        m_onClicked = callback;
+    }
+
+    void Button::on_mouse_button_up(int button)
+    {
+        m_onClicked();
     }
 
 }

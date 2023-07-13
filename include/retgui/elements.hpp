@@ -4,6 +4,7 @@
 #include "types.hpp"
 
 #include <memory>
+#include <functional>
 #include <type_traits>
 
 namespace retgui
@@ -17,12 +18,19 @@ namespace retgui
     template <typename T>
     using ElementPtr = std::shared_ptr<T>;
 
+    template <typename T>
+    auto create_element() -> ElementPtr<T>
+    {
+        static_assert(std::is_base_of<Element, T>::value, "T must derive from Element.");
+        return std::make_shared<T>();
+    }
+
     // https://stackoverflow.com/questions/34639447/disable-or-hide-some-parent-class-functions-in-c
     class Element : public std::enable_shared_from_this<Element>
     {
     public:
         Element() = default;
-        ~Element() = default;
+        virtual ~Element() = default;
 
         auto get_parent() const -> ElementBasePtr;
         auto get_prev_sibling() const -> ElementBasePtr;
@@ -45,15 +53,23 @@ namespace retgui
         auto get_bounds() const -> Rect;
 
         auto get_color() const -> const Color& { return m_color; }
-        auto get_hovered_color() const -> const Color& { return m_hoveredColor; }
         auto set_color(const Color& color) -> ElementBasePtr;
-        auto set_hovered_color(const Color& color) -> ElementBasePtr;
 
         auto get_render_color() const -> const Color&;
 
         auto get_state() const -> U8;
         void add_state(U8 state);
         void remove_state(U8 state);
+
+        virtual void on_mouse_button_down(int button) {}
+        virtual void on_mouse_button_up(int button) {}
+
+    protected:
+        auto get_hovered_color() const -> const Color& { return m_hoveredColor; }
+        auto set_hovered_color(const Color& color) -> ElementBasePtr;
+
+        auto get_active_color() const -> const Color& { return m_activeColor; }
+        auto set_active_color(const Color& color) -> ElementBasePtr;
 
     private:
         ElementBasePtr m_parent{ nullptr };
@@ -67,14 +83,29 @@ namespace retgui
 
         Color m_color{ Color::white() };
         Color m_hoveredColor{ m_color };
+        Color m_activeColor{ m_color };
 
         U8 m_state{};
     };
 
-    template <typename T>
-    auto create_element() -> ElementPtr<T>
+    class Button : public Element
     {
-        static_assert(std::is_base_of<Element, T>::value, "T must derive from Element.");
-        return std::make_shared<T>();
-    }
+    public:
+        Button() = default;
+        ~Button() = default;
+
+        using Element::get_hovered_color;
+        using Element::set_hovered_color;
+
+        using Element::get_active_color;
+        using Element::set_active_color;
+
+        auto get_on_clicked() const -> const std::function<void()>& { return m_onClicked; }
+        void set_on_clicked(std::function<void()>&& callback);
+
+        void on_mouse_button_up(int button) override;
+
+    private:
+        std::function<void()> m_onClicked;
+    };
 }

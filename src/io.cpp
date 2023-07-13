@@ -62,4 +62,24 @@ namespace retgui
         }
     }
 
+    void handle_mouse_button(int button, bool isDown)
+    {
+        auto* context = get_current_context();
+
+        if (context->lastHoveredElement != nullptr)
+        {
+            auto* hoveredElement = context->lastHoveredElement;
+            if (isDown)
+            {
+                hoveredElement->add_state(RETGUI_ELEMENT_STATE_ACTIVE);
+                hoveredElement->on_mouse_button_down(button);
+            }
+            else
+            {
+                hoveredElement->remove_state(RETGUI_ELEMENT_STATE_ACTIVE);
+                hoveredElement->on_mouse_button_up(button);
+            }
+        }
+    }
+
 }

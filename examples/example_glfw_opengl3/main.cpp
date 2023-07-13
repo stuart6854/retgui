@@ -22,6 +22,16 @@ void glfwCursorPosCallback(GLFWwindow* window, double x, double y)
     retgui::trickle_cursor_pos({ float(x), float(y) });
 }
 
+void glfwMouseBtnCallback(GLFWwindow* window, int btn, int action, int mods)
+{
+    if (action == GLFW_REPEAT)
+    {
+        return;
+    }
+
+    retgui::handle_mouse_button(btn, action == GLFW_PRESS);
+}
+
 void APIENTRY
 glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam)
 {
@@ -270,6 +280,7 @@ int main(int argc, char** argv)
     glfwSwapInterval(1);  // VSync
 
     glfwSetCursorPosCallback(window, glfwCursorPosCallback);
+    glfwSetMouseButtonCallback(window, glfwMouseBtnCallback);
 
     if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
     {
@@ -285,23 +296,30 @@ int main(int argc, char** argv)
 
     retgui_opengl_init();
 
-    auto element = retgui::create_element<retgui::Element>()
-                       ->set_position(retgui::Dim2{ retgui::Dim{ 0.0f, 10.0f }, retgui::Dim{ 0.0f, 10.0f } })
-                       ->set_size(retgui::Dim2{ retgui::Dim{ 0.0f, 500.0f }, retgui::Dim{ 0.0f, 300.0f } })
-                       ->set_hovered_color(retgui::Color(0.8f, 0.8f, 0.8f, 1));
-    auto child = retgui::create_element<retgui::Element>()
-                     ->set_position(retgui::Dim2{ retgui::Dim(0, 5), retgui::Dim(0, 5) })
-                     ->set_size(retgui::Dim2{ retgui::Dim(0.5f, 0), retgui::Dim(0.75f, 0) })
-                     ->set_color(retgui::Color(1, 0, 0, 1))
-                     ->set_hovered_color(retgui::Color(0.4f, 0.1f, 0.1f, 1));
-    element->add_child(child);
+    auto element = retgui::create_element<retgui::Element>();
+    element->set_position(retgui::Dim2{ retgui::Dim{ 0.0f, 10.0f }, retgui::Dim{ 0.0f, 10.0f } });
+    element->set_size(retgui::Dim2{ retgui::Dim{ 0.0f, 500.0f }, retgui::Dim{ 0.0f, 300.0f } });
     retgui::add_to_root(element);
 
-    auto trElement = retgui::create_element<retgui::Element>()
-                         ->set_position(retgui::Dim2{ retgui::Dim{ .75f, -5 }, retgui::Dim{ 0, 5 } })
-                         ->set_size(retgui::Dim2{ retgui::Dim{ .25f, 0 }, retgui::Dim{ .4f, 0 } })
-                         ->set_color(retgui::Color{ 0, 1, 0, 1 })
-                         ->set_hovered_color(retgui::Color(0.1f, 0.8f, 0.1f, 1));
+    auto child = retgui::create_element<retgui::Element>();
+    child->set_position(retgui::Dim2{ retgui::Dim(0, 5), retgui::Dim(0, 5) });
+    child->set_size(retgui::Dim2{ retgui::Dim(0.5f, 0), retgui::Dim(0.75f, 0) });
+    child->set_color(retgui::Color(1, 0, 0, 1));
+    element->add_child(child);
+
+    auto buttonChild = retgui::create_element<retgui::Button>();
+    buttonChild->set_position(retgui::Dim2{ retgui::Dim(1.0f, -125), retgui::Dim(0.0f, 5) });
+    buttonChild->set_size(retgui::Dim2{ retgui::Dim(0, 120), retgui::Dim(0, 30) });
+    buttonChild->set_color(retgui::Color(0.450f, 0.418f, 0.418f, 1));
+    buttonChild->set_hovered_color(retgui::Color(0.431f, 0.401f, 0.401f, 1));
+    buttonChild->set_active_color(retgui::Color(0.641f, 0.426f, 0.426f, 1));
+    buttonChild->set_on_clicked([]() { std::cout << "Button Clicked!" << std::endl; });
+    element->add_child(buttonChild);
+
+    auto trElement = retgui::create_element<retgui::Element>();
+    trElement->set_position(retgui::Dim2{ retgui::Dim{ .75f, -5 }, retgui::Dim{ 0, 5 } });
+    trElement->set_size(retgui::Dim2{ retgui::Dim{ .25f, 0 }, retgui::Dim{ .4f, 0 } });
+    trElement->set_color(retgui::Color{ 0, 1, 0, 1 });
     retgui::add_to_root(trElement);
 
     while (!glfwWindowShouldClose(window))
