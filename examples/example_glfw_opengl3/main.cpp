@@ -19,7 +19,8 @@ void error_callback(int error, const char* description)
 
 void glfwCursorPosCallback(GLFWwindow* window, double x, double y)
 {
-    retgui::trickle_cursor_pos({ float(x), float(y) });
+    auto& io = retgui::get_current_context()->io;
+    io.cursorPos = { float(x), float(y) };
 }
 
 void glfwMouseBtnCallback(GLFWwindow* window, int btn, int action, int mods)
@@ -29,7 +30,8 @@ void glfwMouseBtnCallback(GLFWwindow* window, int btn, int action, int mods)
         return;
     }
 
-    retgui::handle_mouse_button(btn, action == GLFW_PRESS);
+    auto& io = retgui::get_current_context()->io;
+    io.mouseBtns[btn] = action == GLFW_PRESS;
 }
 
 void APIENTRY
@@ -326,16 +328,17 @@ int main(int argc, char** argv)
     {
         glfwPollEvents();
 
-        // #TODO: Update here
-
         std::int32_t displayWidth{};
         std::int32_t displayHeight{};
         glfwGetFramebufferSize(window, &displayWidth, &displayHeight);
+
+        retgui::set_root_size(displayWidth, displayHeight);
+
+        retgui::update();
+
         glViewport(0, 0, displayWidth, displayHeight);
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-
-        retgui::set_root_size(displayWidth, displayHeight);
 
         retgui::render();
         retgui_opengl3_render(retgui::get_draw_data());

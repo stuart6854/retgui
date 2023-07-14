@@ -1,9 +1,65 @@
 #include "retgui/elements.hpp"
 
 #include "retgui/retgui.hpp"
+#include "retgui/io.hpp"
+#include "retgui/internal.hpp"
 
 namespace retgui
 {
+    void Element::update()
+    {
+        auto* context = get_current_context();
+        const auto& io = context->io;
+
+        if (m_enabledStates & RETGUI_ELEMENT_STATE_HOVERED)
+        {
+            if (context->hoveredElement == this || context->hoveredElement == nullptr)
+            {
+                bool cursorInside = is_cursor_inside();
+                if (cursorInside)
+                {
+                    context->hoveredElement = this;
+                    add_state(RETGUI_ELEMENT_STATE_HOVERED);
+                    if (m_enabledStates & RETGUI_ELEMENT_STATE_ACTIVE)
+                    {
+                        // #TODO: If any mouse btns are down
+                        if (!(m_state & RETGUI_ELEMENT_STATE_ACTIVE) && io.mouseBtns[0])
+                        {
+                            context->activeElement = this;
+                            add_state(RETGUI_ELEMENT_STATE_ACTIVE);
+                            on_mouse_button_down(0);
+                        }
+                        //                        else if ((m_state & RETGUI_ELEMENT_STATE_ACTIVE) && !io.mouseBtns[0])  // #TODO: If all
+                        //                        mouse btns are up
+                        //                        {
+                        //                            context->activeElement = nullptr;
+                        //                            remove_state(RETGUI_ELEMENT_STATE_ACTIVE);
+                        //                            on_mouse_button_up(0);
+                        //                        }
+                    }
+                }
+                else
+                {
+                    context->hoveredElement = nullptr;
+                    remove_state(RETGUI_ELEMENT_STATE_HOVERED);
+                }
+            }
+
+            if (context->activeElement == this)
+            {
+                if ((m_state & RETGUI_ELEMENT_STATE_ACTIVE) && !io.mouseBtns[0])  // #TODO: If all mouse btns are up
+                {
+                    context->activeElement = nullptr;
+                    remove_state(RETGUI_ELEMENT_STATE_ACTIVE);
+                    if (is_cursor_inside())
+                    {
+                        on_mouse_button_up(0);
+                    }
+                }
+            }
+        }
+    }
+
     auto Element::get_parent() const -> ElementBasePtr
     {
         return m_parent;
@@ -156,14 +212,28 @@ namespace retgui
 
     void Element::add_state(U8 state)
     {
-        m_state |= state;
-        set_dirty();
+        if (m_enabledStates & state)
+        {
+            m_state |= state;
+            set_dirty();
+        }
     }
 
     void Element::remove_state(U8 state)
     {
-        m_state &= ~state;
-        set_dirty();
+        if (m_enabledStates & state)
+        {
+            m_state &= ~state;
+            set_dirty();
+        }
+    }
+
+    bool Element::is_cursor_inside() const
+    {
+        auto& io = get_current_context()->io;
+        const auto cursorPos = io.cursorPos;
+        const auto bb = get_bounds();
+        return (cursorPos.x >= bb.tl.x && cursorPos.x <= bb.br.x) && (cursorPos.y >= bb.tl.y && cursorPos.y <= bb.br.y);
     }
 
     auto Element::set_hovered_color(const Color& color) -> ElementBasePtr
@@ -178,6 +248,16 @@ namespace retgui
         m_activeColor = color;
         set_dirty();
         return shared_from_this();
+    }
+
+    void Element::set_enabled_states(U8 states)
+    {
+        m_enabledStates = states;
+    }
+
+    Button::Button()
+    {
+        set_enabled_states(RETGUI_ELEMENT_STATE_HOVERED | RETGUI_ELEMENT_STATE_ACTIVE);
     }
 
     void Button::set_on_clicked(std::function<void()>&& callback)

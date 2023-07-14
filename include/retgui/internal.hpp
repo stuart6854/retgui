@@ -1,5 +1,6 @@
 #pragma once
 
+#include "retgui/io.hpp"
 #include "retgui/elements.hpp"
 
 #include <vector>
@@ -14,12 +15,13 @@ namespace retgui
     struct RetGuiContext
     {
         Vec2 displaySize{};
+        IO io{};
 
         ElementBasePtr root{ nullptr };
         bool dirty{ true };
 
-        Element* lastHoveredElement{ nullptr };
-        Element* lastFocusedElement{ nullptr };
+        Element* hoveredElement{ nullptr };
+        Element* activeElement{ nullptr };
 
         RetGuiDrawData drawData{};
     };

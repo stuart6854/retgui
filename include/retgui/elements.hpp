@@ -32,6 +32,8 @@ namespace retgui
         Element() = default;
         virtual ~Element() = default;
 
+        void update();
+
         auto get_parent() const -> ElementBasePtr;
         auto get_prev_sibling() const -> ElementBasePtr;
         auto get_next_sibling() const -> ElementBasePtr;
@@ -61,6 +63,8 @@ namespace retgui
         void add_state(U8 state);
         void remove_state(U8 state);
 
+        bool is_cursor_inside() const;
+
         virtual void on_mouse_button_down(int button) {}
         virtual void on_mouse_button_up(int button) {}
 
@@ -70,6 +74,8 @@ namespace retgui
 
         auto get_active_color() const -> const Color& { return m_activeColor; }
         auto set_active_color(const Color& color) -> ElementBasePtr;
+
+        void set_enabled_states(U8 states);
 
     private:
         ElementBasePtr m_parent{ nullptr };
@@ -86,12 +92,13 @@ namespace retgui
         Color m_activeColor{ m_color };
 
         U8 m_state{};
+        U8 m_enabledStates{};
     };
 
     class Button : public Element
     {
     public:
-        Button() = default;
+        Button();
         ~Button() = default;
 
         using Element::get_hovered_color;

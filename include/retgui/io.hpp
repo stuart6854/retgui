@@ -2,8 +2,13 @@
 
 #include "retgui/types.hpp"
 
+#include <array>
+
 namespace retgui
 {
-    void trickle_cursor_pos(const Vec2& cursorPos);
-    void handle_mouse_button(int button, bool isDown);
+    struct IO
+    {
+        Vec2 cursorPos{};
+        std::array<bool, 8> mouseBtns{};
+    };
 }

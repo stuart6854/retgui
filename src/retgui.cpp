@@ -59,6 +59,28 @@ namespace retgui
         g_retGui->dirty = true;
     }
 
+    void update_element(Element* element)
+    {
+        auto child = element->get_first_child();
+        while (child != nullptr)
+        {
+            update_element(child.get());
+            child = child->get_next_sibling();
+        }
+
+        element->update();
+    }
+
+    void update()
+    {
+        auto child = g_retGui->root->get_first_child();
+        while (child != nullptr)
+        {
+            update_element(child.get());
+            child = child->get_next_sibling();
+        }
+    }
+
     void render_element(const Element* element)
     {
         const auto bounds = element->get_bounds();

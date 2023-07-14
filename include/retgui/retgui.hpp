@@ -36,6 +36,8 @@ namespace retgui
 
     void set_dirty();
 
+    void update();
+
     bool render();  // Returns TRUE if render data changed
     auto get_draw_data() -> const RetGuiDrawData*;
 
