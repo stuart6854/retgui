@@ -33,6 +33,7 @@ namespace retgui
         virtual ~Element() = default;
 
         void update();
+        virtual void render(DrawList& drawList) const;
 
         auto get_parent() const -> ElementBasePtr;
         auto get_prev_sibling() const -> ElementBasePtr;

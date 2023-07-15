@@ -60,6 +60,14 @@ namespace retgui
         }
     }
 
+    void Element::render(DrawList& drawList) const
+    {
+        const auto bounds = get_bounds();
+        const auto& color = get_render_color();
+
+        drawList.add_rect(bounds.tl, bounds.br, color.Int32());
+    }
+
     auto Element::get_parent() const -> ElementBasePtr
     {
         return m_parent;
