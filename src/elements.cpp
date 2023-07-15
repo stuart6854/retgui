@@ -291,6 +291,12 @@ namespace retgui
         for (auto i = 0; i < m_text.size(); ++i)
         {
             char character = m_text[i];
+            if (character == '\n')
+            {
+                x = screenPos.x;
+                y += m_font->LineSpacing;
+            }
+
             auto* glyph = m_font->get_glyph(U32(character));
             if (glyph == nullptr)
             {

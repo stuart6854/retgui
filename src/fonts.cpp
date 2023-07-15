@@ -73,6 +73,7 @@ namespace retgui
         font->Ascender = std::roundf(float(ascent) * scale);    // Scale this
         font->Descender = std::roundf(float(descent) * scale);  // Scale this
         font->LineGap = std::roundf(float(lineGap) * scale);    // Scale this
+        font->LineSpacing = font->Ascender - font->Descender + font->LineGap;
 
         std::int32_t highestGlyph{};
         for (const auto& charsetRange : charsetRanges)
