@@ -297,8 +297,8 @@ namespace retgui
                 glyph = m_font->get_glyph('?');
             }
 
-            Vec2 quadTL = { x + glyph->x0, y + glyph->y0 };
-            Vec2 quadBR = { x + glyph->x1, y + glyph->y1 };
+            Vec2 quadTL = { std::roundf(x + glyph->x0), std::roundf(y + glyph->y0) };
+            Vec2 quadBR = { std::roundf(x + glyph->x1), std::roundf(y + glyph->y1) };
             Vec2 uvMin = { glyph->ux0, glyph->uy0 };
             Vec2 uvMax = { glyph->ux1, glyph->uy1 };
 
