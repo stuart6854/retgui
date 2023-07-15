@@ -83,11 +83,6 @@ namespace retgui
 
     void render_element(const Element* element)
     {
-        const auto bounds = element->get_bounds();
-
-        const auto& color = element->get_render_color();
-        g_retGui->drawData.drawList.add_rect(bounds.tl, bounds.br, color.Int32());
-
         element->render(g_retGui->drawData.drawList);
 
         auto child = element->get_first_child();

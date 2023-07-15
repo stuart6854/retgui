@@ -198,6 +198,7 @@ void retgui_opengl_init()
     glDeleteShader(vertShader);
     glDeleteShader(fragShader);
 
+#if 0
     std::uint8_t whitePixel[] = { 255, 255, 255 };
 
     glGenTextures(1, &g_oglDrawData.whiteTexture);
@@ -205,6 +206,21 @@ void retgui_opengl_init()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, whitePixel);
+#endif
+
+    std::uint32_t width{};
+    std::uint32_t height{};
+    std::vector<std::uint32_t> textureData{};
+    retgui::get_current_context()->io.Fonts.get_texture_data_as_rgba32(textureData, width, height);
+
+    glGenTextures(1, &g_oglDrawData.whiteTexture);
+    glBindTexture(GL_TEXTURE_2D, g_oglDrawData.whiteTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData.data());
 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -214,6 +230,7 @@ void retgui_opengl3_setup_render_state()
     auto* context = retgui::get_current_context();
 
     glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_STENCIL_TEST);
@@ -296,6 +313,10 @@ int main(int argc, char** argv)
 
     retgui::create_context();
 
+    auto& io = retgui::get_current_context()->io;
+    auto* font32 = io.Fonts.add_font_from_file("fonts/Karla-Regular.ttf", 32.0f);
+    auto* font64 = io.Fonts.add_font_from_file("fonts/Karla-Regular.ttf", 64.0f);
+
     retgui_opengl_init();
 
     auto element = retgui::create_element<retgui::Element>();
@@ -318,11 +339,29 @@ int main(int argc, char** argv)
     buttonChild->set_on_clicked([]() { std::cout << "Button Clicked!" << std::endl; });
     element->add_child(buttonChild);
 
+    auto btnLabel = retgui::create_element<retgui::Label>();
+    btnLabel->set_position(retgui::Dim2{ retgui::Dim(0, 0), retgui::Dim(0, 0) });
+    btnLabel->set_size(retgui::Dim2{ retgui::Dim(1, 0), retgui::Dim(1, 0) });
+    btnLabel->set_color(retgui::Color(1, 0, 1, 1));
+    btnLabel->set_font(font32);
+    btnLabel->set_text("Hello World!");
+    buttonChild->add_child(btnLabel);
+
     auto trElement = retgui::create_element<retgui::Element>();
     trElement->set_position(retgui::Dim2{ retgui::Dim{ .75f, -5 }, retgui::Dim{ 0, 5 } });
     trElement->set_size(retgui::Dim2{ retgui::Dim{ .25f, 0 }, retgui::Dim{ .4f, 0 } });
     trElement->set_color(retgui::Color{ 0, 1, 0, 1 });
     retgui::add_to_root(trElement);
+
+    auto someLabel = retgui::create_element<retgui::Label>();
+    someLabel->set_position(retgui::Dim2{ retgui::Dim(0, 0), retgui::Dim(0.5f, 0) });
+    someLabel->set_size(retgui::Dim2{ retgui::Dim(1, 0), retgui::Dim(0, 30) });
+    someLabel->set_color(retgui::Color(1, 1, 1, 1));
+    someLabel->set_font(font32);
+    someLabel->set_text(
+        "abcdefghijklmnopqrstuvqxyz ABCDEFGHIJKLMNOPQRSTUVQXYZ\n1234567890.:,;'\"(!?)+-*/=\nThe quick brown fox jumps over the lazy dog. "
+        "1234567890");
+    retgui::add_to_root(someLabel);
 
     while (!glfwWindowShouldClose(window))
     {

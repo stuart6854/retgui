@@ -2,8 +2,10 @@
 
 #include "retgui.hpp"
 #include "types.hpp"
+#include "fonts.hpp"
 
 #include <memory>
+#include <string>
 #include <functional>
 #include <type_traits>
 
@@ -116,4 +118,24 @@ namespace retgui
     private:
         std::function<void()> m_onClicked;
     };
+
+    class Label : public Element
+    {
+    public:
+        Label();
+        ~Label() = default;
+
+        void render(DrawList& drawList) const override;
+
+        auto get_font() const -> Font* { return m_font; }
+        void set_font(Font* font);
+
+        auto get_text() const -> const std::string& { return m_text; }
+        void set_text(const std::string& text);
+
+    private:
+        Font* m_font{ nullptr };
+        std::string m_text{};
+    };
+
 }

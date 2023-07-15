@@ -65,7 +65,7 @@ namespace retgui
         const auto bounds = get_bounds();
         const auto& color = get_render_color();
 
-        drawList.add_rect(bounds.tl, bounds.br, color.Int32());
+        drawList.add_rect(bounds.tl, bounds.br, color.Int32(), { 0, 1 }, { 1, 0 });
     }
 
     auto Element::get_parent() const -> ElementBasePtr
@@ -276,6 +276,57 @@ namespace retgui
     void Button::on_mouse_button_up(int button)
     {
         m_onClicked();
+    }
+
+    Label::Label() = default;
+
+    void Label::render(DrawList& drawList) const
+    {
+        const auto screenPos = get_screen_position();
+        float x = screenPos.x;  // Align to be pixel perfect
+        float y = screenPos.y;  // Align to be pixel-perfect
+
+        y += float(m_font->Ascender);
+
+        for (auto i = 0; i < m_text.size(); ++i)
+        {
+            char character = m_text[i];
+            auto* glyph = m_font->get_glyph(U32(character));
+            if (glyph == nullptr)
+            {
+                glyph = m_font->get_glyph('?');
+            }
+
+            Vec2 quadTL = { x + glyph->x0, y + glyph->y0 };
+            Vec2 quadBR = { x + glyph->x1, y + glyph->y1 };
+            Vec2 uvMin = { glyph->ux0, glyph->uy0 };
+            Vec2 uvMax = { glyph->ux1, glyph->uy1 };
+
+            drawList.add_rect(quadTL, quadBR, get_render_color().Int32(), uvMin, uvMax);
+
+            double advance = 0.0;
+            if (i < m_text.size() - 1)
+            {
+                advance = glyph->AdvanceX;
+                //            char nextCharacter = string[i + 1];
+                //            geometry.getAdvance(advance, character, nextCharacter);
+            }
+
+            float kerningOffset = 0.0f;
+            x += float(advance) + kerningOffset;
+        }
+    }
+
+    void Label::set_font(Font* font)
+    {
+        m_font = font;
+        set_dirty();
+    }
+
+    void Label::set_text(const std::string& text)
+    {
+        m_text = text;
+        set_dirty();
     }
 
 }

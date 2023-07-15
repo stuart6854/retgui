@@ -121,12 +121,12 @@ namespace retgui
 
     void DrawList::add_line(const Vec2& a, const Vec2& b) {}
 
-    void DrawList::add_rect(const Vec2& min, const Vec2& max, std::uint32_t color)
+    void DrawList::add_rect(const Vec2& min, const Vec2& max, std::uint32_t color, const Vec2& uvMin, const Vec2& uvMax)
     {
-        DrawVert a{ min, { 0, 1 }, color };               // TL
-        DrawVert b{ { min.x, max.y }, { 0, 0 }, color };  // BL
-        DrawVert c{ max, { 1, 0 }, color };               // BR
-        DrawVert d{ { max.x, min.y }, { 1, 1 }, color };  // TR
+        DrawVert a{ min, uvMin, color };                              // TL
+        DrawVert b{ { min.x, max.y }, { uvMin.x, uvMax.y }, color };  // BL
+        DrawVert c{ max, uvMax, color };                              // BR
+        DrawVert d{ { max.x, min.y }, { uvMax.x, uvMin.y }, color };  // TR
 
         const auto idxOffset = VertBuffer.size();
         VertBuffer.push_back(a);

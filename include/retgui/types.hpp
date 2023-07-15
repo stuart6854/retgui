@@ -6,6 +6,8 @@
 
 namespace retgui
 {
+    using I32 = std::int32_t;
+
     using U8 = std::uint8_t;
     using U32 = std::uint32_t;
 
@@ -152,6 +154,6 @@ namespace retgui
         std::vector<DrawIdx> IdxBuffer;
 
         void add_line(const Vec2& a, const Vec2& b);
-        void add_rect(const Vec2& min, const Vec2& max, std::uint32_t color);
+        void add_rect(const Vec2& min, const Vec2& max, std::uint32_t color, const Vec2& uvMin, const Vec2& uvMax);
     };
 }
