@@ -6,9 +6,6 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb_truetype.h>
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <stb_image_write.h>
-
 #include <fstream>
 
 namespace retgui
@@ -47,6 +44,7 @@ namespace retgui
     {
         if (charsetRanges.empty())
         {
+            // Add latin characters by default
             charsetRanges = {
                 { 0x0020, 0x00FF },  // Basic Latin + Latin Supplement
             };
@@ -123,19 +121,12 @@ namespace retgui
 
     void Fonts::get_texture_data_as_alpha8(std::vector<U8>& outPixels, U32& outWidth, U32& outHeight)
     {
-        struct FontCharPackedRect
-        {
-            U32 fontIdx{};
-            U32 codePoint{};
-            U32 packedIndex{};
-        };
         std::vector<stbrp_rect> packedRects{};
 
         for (auto i = 0; i < m_fontCharsToPack.size(); ++i)
         {
             const auto& fontCharToPack = m_fontCharsToPack[i];
 
-            const auto packedRectIdx = packedRects.size();
             auto& packedRect = packedRects.emplace_back();
             packedRect.id = i;
             packedRect.w = fontCharToPack.Width;

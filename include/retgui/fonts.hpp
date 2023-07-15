@@ -20,7 +20,7 @@ namespace retgui
     /* A structure that describes a glyph. */
     struct GlyphMetrics
     {
-        // Bounding Box
+        // Bounding Box (around the origin)
         I32 x0;
         I32 y0;
         I32 x1;
@@ -30,9 +30,8 @@ namespace retgui
         float uy0;
         float ux1;
         float uy1;
-        I32 OffsetX;     // The distance from the origin ("pen position") to the left of the glyph.
-        I32 OffsetY;     // The distance from the origin to the top of the glyph. This is usally a value < 0.
-        float AdvanceX;  // The distance from the origin to the origin of the next glyph. This is usually a value > 0.
+        // The distance from the origin to the origin of the next glyph. This is usually a value > 0.
+        float AdvanceX;
     };
 
     struct Font
