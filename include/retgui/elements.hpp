@@ -35,7 +35,7 @@ namespace retgui
         virtual ~Element() = default;
 
         void update();
-        virtual void render(DrawList& drawList) const;
+        virtual void render(DrawData& drawData) const;
 
         auto get_parent() const -> ElementBasePtr;
         auto get_prev_sibling() const -> ElementBasePtr;
@@ -129,7 +129,7 @@ namespace retgui
         Label();
         ~Label() = default;
 
-        void render(DrawList& drawList) const override;
+        void render(DrawData& drawData) const override;
 
         auto get_font() const -> Font* { return m_font; }
         void set_font(Font* font);

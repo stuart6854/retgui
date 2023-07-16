@@ -60,12 +60,13 @@ namespace retgui
         }
     }
 
-    void Element::render(DrawList& drawList) const
+    void Element::render(DrawData& drawData) const
     {
         const auto bounds = get_bounds();
         const auto& color = get_render_color();
 
-        drawList.add_rect(bounds.tl, bounds.br, color.Int32(), { 0, 1 }, { 1, 0 });
+        drawData.add_draw_cmd(m_texture);
+        drawData.add_rect(bounds.tl, bounds.br, color.Int32(), { 0, 1 }, { 1, 0 });
     }
 
     auto Element::get_parent() const -> ElementBasePtr
@@ -280,8 +281,11 @@ namespace retgui
 
     Label::Label() = default;
 
-    void Label::render(DrawList& drawList) const
+    void Label::render(DrawData& drawData) const
     {
+        auto& io = get_current_context()->io;
+        drawData.add_draw_cmd(io.Fonts.get_tex_id());
+
         const auto screenPos = get_screen_position();
         float x = screenPos.x;  // Align to be pixel perfect
         float y = screenPos.y;  // Align to be pixel-perfect
@@ -308,7 +312,7 @@ namespace retgui
             Vec2 uvMin = { glyph->ux0, glyph->uy0 };
             Vec2 uvMax = { glyph->ux1, glyph->uy1 };
 
-            drawList.add_rect(quadTL, quadBR, get_render_color().Int32(), uvMin, uvMax);
+            drawData.add_rect(quadTL, quadBR, get_render_color().Int32(), uvMin, uvMax);
 
             double advance = 0.0;
             if (i < m_text.size() - 1)

@@ -150,10 +150,20 @@ namespace retgui
         std::uint32_t col{};
     };
 
-    struct DrawList
+    struct DrawCmd
     {
-        std::vector<DrawVert> VertBuffer;
-        std::vector<DrawIdx> IdxBuffer;
+        TexId TextureId{};
+        U32 IndexOffset{};
+        U32 IndexCount{};
+    };
+
+    struct DrawData
+    {
+        std::vector<DrawCmd> DrawCmds{};
+        std::vector<DrawVert> VertexBuffer{};
+        std::vector<DrawIdx> IndexBuffer{};
+
+        void add_draw_cmd(TexId texture);
 
         void add_line(const Vec2& a, const Vec2& b);
         void add_rect(const Vec2& min, const Vec2& max, std::uint32_t color, const Vec2& uvMin, const Vec2& uvMax);

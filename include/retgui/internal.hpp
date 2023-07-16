@@ -7,11 +7,6 @@
 
 namespace retgui
 {
-    struct RetGuiDrawData
-    {
-        DrawList drawList{};
-    };
-
     struct RetGuiContext
     {
         Vec2 displaySize{};
@@ -23,6 +18,6 @@ namespace retgui
         Element* hoveredElement{ nullptr };
         Element* activeElement{ nullptr };
 
-        RetGuiDrawData drawData{};
+        DrawData drawData{};
     };
 }

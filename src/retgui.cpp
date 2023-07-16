@@ -83,7 +83,7 @@ namespace retgui
 
     void render_element(const Element* element)
     {
-        element->render(g_retGui->drawData.drawList);
+        element->render(g_retGui->drawData);
 
         auto child = element->get_first_child();
         while (child != nullptr)
@@ -101,7 +101,7 @@ namespace retgui
         }
 
         auto* drawData = &g_retGui->drawData;
-        *drawData = RetGuiDrawData{};
+        *drawData = DrawData{};
         auto child = g_retGui->root->get_first_child();
         while (child != nullptr)
         {
@@ -109,11 +109,16 @@ namespace retgui
             child = child->get_next_sibling();
         }
 
+        if (!drawData->DrawCmds.empty())
+        {
+            drawData->DrawCmds.back().IndexCount = drawData->IndexBuffer.size() - drawData->DrawCmds.back().IndexOffset;
+        }
+
         g_retGui->dirty = false;
         return true;
     }
 
-    auto get_draw_data() -> const RetGuiDrawData*
+    auto get_draw_data() -> const DrawData*
     {
         return &g_retGui->drawData;
     }

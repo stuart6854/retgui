@@ -13,7 +13,7 @@ namespace retgui
     // Forward Declarations
     // ----------------------------------------------------
     struct RetGuiContext;
-    struct RetGuiDrawData;
+    struct DrawData;
 
     // ----------------------------------------------------
     // Context creation and access
@@ -39,6 +39,6 @@ namespace retgui
     void update();
 
     bool render();  // Returns TRUE if render data changed
-    auto get_draw_data() -> const RetGuiDrawData*;
+    auto get_draw_data() -> const DrawData*;
 
 }

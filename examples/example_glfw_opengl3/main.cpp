@@ -255,31 +255,34 @@ void retgui_opengl3_setup_render_state()
     glBindVertexArray(g_oglDrawData.vao);
 }
 
-void retgui_opengl3_render(const retgui::RetGuiDrawData* drawData)
+void retgui_opengl3_render(const retgui::DrawData* drawData)
 {
-    const auto vertexSize = drawData->drawList.VertBuffer.size() * sizeof(retgui::DrawVert);
+    const auto vertexSize = drawData->VertexBuffer.size() * sizeof(retgui::DrawVert);
     glBindBuffer(GL_ARRAY_BUFFER, g_oglDrawData.vertexBuffer);
     if (g_oglDrawData.vertexBufferSize < vertexSize)
     {
         glBufferData(GL_ARRAY_BUFFER, vertexSize, nullptr, GL_DYNAMIC_DRAW);
         g_oglDrawData.vertexBufferSize = vertexSize;
     }
-    glBufferSubData(GL_ARRAY_BUFFER, 0, vertexSize, drawData->drawList.VertBuffer.data());
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vertexSize, drawData->VertexBuffer.data());
 
-    const auto indexSize = drawData->drawList.IdxBuffer.size() * sizeof(retgui::DrawIdx);
+    const auto indexSize = drawData->IndexBuffer.size() * sizeof(retgui::DrawIdx);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_oglDrawData.indexBuffer);
     if (g_oglDrawData.indexBufferSize < indexSize)
     {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexSize, nullptr, GL_DYNAMIC_DRAW);
         g_oglDrawData.indexBufferSize = indexSize;
     }
-    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexSize, drawData->drawList.IdxBuffer.data());
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexSize, drawData->IndexBuffer.data());
 
     retgui_opengl3_setup_render_state();
 
-    glBindTexture(GL_TEXTURE_2D, g_oglDrawData.whiteTexture);
+    for (auto cmd : drawData->DrawCmds)
+    {
+        glBindTexture(GL_TEXTURE_2D, GLuint(cmd.TextureId));
 
-    glDrawElements(GL_TRIANGLES, drawData->drawList.IdxBuffer.size(), GL_UNSIGNED_INT, nullptr);
+        glDrawElements(GL_TRIANGLES, cmd.IndexCount, GL_UNSIGNED_INT, (void*)(cmd.IndexOffset * sizeof(retgui::U32)));
+    }
 }
 
 int main(int argc, char** argv)

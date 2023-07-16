@@ -1,5 +1,9 @@
 #include "retgui/types.hpp"
 
+#include "retgui/retgui.hpp"
+#include "retgui/io.hpp"
+#include "retgui/internal.hpp"
+
 namespace retgui
 {
     auto ColorToUInt32(float r, float g, float b, float a) -> U32
@@ -119,26 +123,47 @@ namespace retgui
         return !(*this == rhs);
     }
 
-    void DrawList::add_line(const Vec2& a, const Vec2& b) {}
+    void DrawData::add_draw_cmd(TexId texture)
+    {
+        if (texture == 0)
+        {
+            texture = get_current_context()->io.Fonts.get_tex_id();
+        }
 
-    void DrawList::add_rect(const Vec2& min, const Vec2& max, std::uint32_t color, const Vec2& uvMin, const Vec2& uvMax)
+        if (DrawCmds.empty())
+        {
+            DrawCmds.emplace_back(DrawCmd{ texture, 0u, 0u });
+        }
+        else
+        {
+            if (DrawCmds.back().TextureId != texture)
+            {
+                DrawCmds.back().IndexCount = IndexBuffer.size() - DrawCmds.back().IndexOffset;
+                DrawCmds.emplace_back(DrawCmd{ texture, U32(IndexBuffer.size()), 0 });
+            }
+        }
+    }
+
+    void DrawData::add_line(const Vec2& a, const Vec2& b) {}
+
+    void DrawData::add_rect(const Vec2& min, const Vec2& max, std::uint32_t color, const Vec2& uvMin, const Vec2& uvMax)
     {
         DrawVert a{ min, uvMin, color };                              // TL
         DrawVert b{ { min.x, max.y }, { uvMin.x, uvMax.y }, color };  // BL
         DrawVert c{ max, uvMax, color };                              // BR
         DrawVert d{ { max.x, min.y }, { uvMax.x, uvMin.y }, color };  // TR
 
-        const auto idxOffset = VertBuffer.size();
-        VertBuffer.push_back(a);
-        VertBuffer.push_back(b);
-        VertBuffer.push_back(c);
-        VertBuffer.push_back(d);
+        const auto idxOffset = VertexBuffer.size();
+        VertexBuffer.push_back(a);
+        VertexBuffer.push_back(b);
+        VertexBuffer.push_back(c);
+        VertexBuffer.push_back(d);
 
-        IdxBuffer.push_back(idxOffset + 0);
-        IdxBuffer.push_back(idxOffset + 1);
-        IdxBuffer.push_back(idxOffset + 2);
-        IdxBuffer.push_back(idxOffset + 2);
-        IdxBuffer.push_back(idxOffset + 3);
-        IdxBuffer.push_back(idxOffset + 0);
+        IndexBuffer.push_back(idxOffset + 0);
+        IndexBuffer.push_back(idxOffset + 1);
+        IndexBuffer.push_back(idxOffset + 2);
+        IndexBuffer.push_back(idxOffset + 2);
+        IndexBuffer.push_back(idxOffset + 3);
+        IndexBuffer.push_back(idxOffset + 0);
     }
 }
