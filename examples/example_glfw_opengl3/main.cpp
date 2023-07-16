@@ -198,7 +198,7 @@ void retgui_opengl_init()
     glDeleteShader(vertShader);
     glDeleteShader(fragShader);
 
-#if 0
+    // TODO: Add white square to texture atlas
     std::uint8_t whitePixel[] = { 255, 255, 255 };
 
     glGenTextures(1, &g_oglDrawData.whiteTexture);
@@ -206,21 +206,23 @@ void retgui_opengl_init()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, whitePixel);
-#endif
 
     std::uint32_t width{};
     std::uint32_t height{};
     std::vector<std::uint32_t> textureData{};
     retgui::get_current_context()->io.Fonts.get_texture_data_as_rgba32(textureData, width, height);
 
-    glGenTextures(1, &g_oglDrawData.whiteTexture);
-    glBindTexture(GL_TEXTURE_2D, g_oglDrawData.whiteTexture);
+    GLuint fontTextureId{};
+    glGenTextures(1, &fontTextureId);
+    glBindTexture(GL_TEXTURE_2D, fontTextureId);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData.data());
+
+    retgui::get_current_context()->io.Fonts.set_tex_id(fontTextureId);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 }

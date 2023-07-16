@@ -57,6 +57,9 @@ namespace retgui
         auto get_screen_size() const -> Vec2;
         auto get_bounds() const -> Rect;
 
+        auto get_texture() const -> TexId { return m_texture; }
+        void set_texture(TexId texture);
+
         auto get_color() const -> const Color& { return m_color; }
         auto set_color(const Color& color) -> ElementBasePtr;
 
@@ -90,6 +93,7 @@ namespace retgui
         Dim2 m_position{};
         Dim2 m_size{};
 
+        TexId m_texture{};
         Color m_color{ Color::white() };
         Color m_hoveredColor{ m_color };
         Color m_activeColor{ m_color };
@@ -132,6 +136,10 @@ namespace retgui
 
         auto get_text() const -> const std::string& { return m_text; }
         void set_text(const std::string& text);
+
+    private:
+        using Element::get_texture;
+        using Element::set_texture;
 
     private:
         Font* m_font{ nullptr };

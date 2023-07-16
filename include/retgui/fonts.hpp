@@ -65,8 +65,12 @@ namespace retgui
         void get_texture_data_as_alpha8(std::vector<U8>& outPixels, U32& outWidth, U32& outHeight);
         void get_texture_data_as_rgba32(std::vector<U32>& outPixels, U32& outWidth, U32& outHeight);
 
+        auto get_tex_id() const -> TexId { return m_texture; }
+        void set_tex_id(TexId texture);
+
     private:
         std::vector<std::unique_ptr<Font>> m_fonts{};
+        TexId m_texture{};
 
         struct FontCharToPack
         {

@@ -203,4 +203,9 @@ namespace retgui
         }
     }
 
+    void Fonts::set_tex_id(TexId texture)
+    {
+        m_texture = texture;
+    }
+
 }
