@@ -10,6 +10,8 @@
 
 namespace retgui
 {
+    constexpr auto WhitePixelSize = 6;
+
     int NextPowerOf2(int n)
     {
         n |= (n >> 16);
@@ -133,6 +135,13 @@ namespace retgui
             packedRect.h = fontCharToPack.Height;
         }
 
+        // Add white pixels
+        {
+            auto& packedWhitePixels = packedRects.emplace_back();
+            packedWhitePixels.w = WhitePixelSize;
+            packedWhitePixels.h = WhitePixelSize;
+        }
+
         auto atlasWidth = 128;
         auto atlasHeight = 128;
         stbrp_context rpContext{};
@@ -149,9 +158,10 @@ namespace retgui
         outWidth = atlasWidth;
         outHeight = atlasHeight;
         outPixels = std::vector<U8>(atlasWidth * atlasHeight, 0);
-        for (const auto& packedRect : packedRects)
+        for (auto i = 0; i < m_fontCharsToPack.size(); ++i)
         {
-            const auto& packedFontChar = m_fontCharsToPack[packedRect.id];
+            const auto& packedFontChar = m_fontCharsToPack[i];
+            const auto& packedRect = packedRects[i];
 
             auto& font = m_fonts[packedFontChar.FontIdx];
             auto& glyph = font->glyphs[packedFontChar.CodePoint];
@@ -171,6 +181,24 @@ namespace retgui
             }
 
             stbtt_FreeBitmap(packedFontChar.Bitmap, nullptr);
+        }
+
+        // Add white pixels
+        {
+            const auto& packedWhitePixels = packedRects.back();
+            for (int y = 0; y < packedWhitePixels.h; ++y)
+            {
+                for (int x = 0; x < packedWhitePixels.w; ++x)
+                {
+                    auto atlasIndex = (packedWhitePixels.x + x) + (packedWhitePixels.y + y) * atlasWidth;
+                    outPixels[atlasIndex] = 255;  // White
+                }
+            }
+
+            m_whitePixelCoords = {
+                (float(packedWhitePixels.x) + float(packedWhitePixels.w) * 0.5f) / float(atlasWidth),
+                (float(atlasHeight - packedWhitePixels.y) + float(packedWhitePixels.h) * 0.5f) / float(atlasHeight),
+            };
         }
 
         // Flip atlas pixels vertically

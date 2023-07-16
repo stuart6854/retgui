@@ -68,9 +68,12 @@ namespace retgui
         auto get_tex_id() const -> TexId { return m_texture; }
         void set_tex_id(TexId texture);
 
+        auto get_white_pixel_coords() const -> const Vec2& { return m_whitePixelCoords; }
+
     private:
         std::vector<std::unique_ptr<Font>> m_fonts{};
         TexId m_texture{};
+        Vec2 m_whitePixelCoords{};
 
         struct FontCharToPack
         {

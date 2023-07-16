@@ -166,6 +166,7 @@ namespace retgui
         void add_draw_cmd(TexId texture);
 
         void add_line(const Vec2& a, const Vec2& b);
-        void add_rect(const Vec2& min, const Vec2& max, std::uint32_t color, const Vec2& uvMin, const Vec2& uvMax);
+        void add_textured_rect(const Vec2& min, const Vec2& max, std::uint32_t color, const Vec2& uvMin, const Vec2& uvMax);
+        void add_rect(const Vec2& min, const Vec2& max, std::uint32_t color);
     };
 }

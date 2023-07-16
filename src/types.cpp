@@ -146,7 +146,30 @@ namespace retgui
 
     void DrawData::add_line(const Vec2& a, const Vec2& b) {}
 
-    void DrawData::add_rect(const Vec2& min, const Vec2& max, std::uint32_t color, const Vec2& uvMin, const Vec2& uvMax)
+    void DrawData::add_rect(const Vec2& min, const Vec2& max, std::uint32_t color)
+    {
+        const auto& whitePixelCoords = get_current_context()->io.Fonts.get_white_pixel_coords();
+
+        DrawVert a{ min, whitePixelCoords, color };               // TL
+        DrawVert b{ { min.x, max.y }, whitePixelCoords, color };  // BL
+        DrawVert c{ max, whitePixelCoords, color };               // BR
+        DrawVert d{ { max.x, min.y }, whitePixelCoords, color };  // TR
+
+        const auto idxOffset = VertexBuffer.size();
+        VertexBuffer.push_back(a);
+        VertexBuffer.push_back(b);
+        VertexBuffer.push_back(c);
+        VertexBuffer.push_back(d);
+
+        IndexBuffer.push_back(idxOffset + 0);
+        IndexBuffer.push_back(idxOffset + 1);
+        IndexBuffer.push_back(idxOffset + 2);
+        IndexBuffer.push_back(idxOffset + 2);
+        IndexBuffer.push_back(idxOffset + 3);
+        IndexBuffer.push_back(idxOffset + 0);
+    }
+
+    void DrawData::add_textured_rect(const Vec2& min, const Vec2& max, std::uint32_t color, const Vec2& uvMin, const Vec2& uvMax)
     {
         DrawVert a{ min, uvMin, color };                              // TL
         DrawVert b{ { min.x, max.y }, { uvMin.x, uvMax.y }, color };  // BL
@@ -166,4 +189,5 @@ namespace retgui
         IndexBuffer.push_back(idxOffset + 3);
         IndexBuffer.push_back(idxOffset + 0);
     }
+
 }

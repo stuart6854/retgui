@@ -66,7 +66,7 @@ namespace retgui
         const auto& color = get_render_color();
 
         drawData.add_draw_cmd(m_texture);
-        drawData.add_rect(bounds.tl, bounds.br, color.Int32(), { 0, 1 }, { 1, 0 });
+        drawData.add_rect(bounds.tl, bounds.br, color.Int32());
     }
 
     auto Element::get_parent() const -> ElementBasePtr
@@ -312,7 +312,7 @@ namespace retgui
             Vec2 uvMin = { glyph->ux0, glyph->uy0 };
             Vec2 uvMax = { glyph->ux1, glyph->uy1 };
 
-            drawData.add_rect(quadTL, quadBR, get_render_color().Int32(), uvMin, uvMax);
+            drawData.add_textured_rect(quadTL, quadBR, get_render_color().Int32(), uvMin, uvMax);
 
             double advance = 0.0;
             if (i < m_text.size() - 1)
