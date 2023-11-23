@@ -1,9 +1,0 @@
-# Build Artifacts
-build/
-bin/
-cmake-build-*/
-
-# IDE Artifacts
-.vs/
-.vscode/
-.idea/
