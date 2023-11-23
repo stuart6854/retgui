@@ -1,0 +1,17 @@
+﻿# Solution
+.vs/
+.vscode/
+.idea/
+*.user
+*.sln
+*.vcxproj
+*.vcxproj.filter
+Makefile
+*.make
+
+# Build
+bin/
+obj/
+
+# Uneeded Resources
+*.rbin
