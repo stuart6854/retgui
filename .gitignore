@@ -13,6 +13,7 @@ Makefile
 bin/
 obj/
 build/
+cmake-build-*/
 
 # Uneeded Resources
 *.rbin
