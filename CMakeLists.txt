@@ -14,6 +14,8 @@ add_subdirectory(retgui)
 
 if(${RETGUI_BUILD_TESTS})
     # SDL
+    set(SDL_SHARED OFF CACHE BOOL "Build a SDL shared library (if available)")
+    set(SDL_STATIC ON CACHE BOOL "Build a SDL static library (if available)")
     add_subdirectory(external/sdl EXCLUDE_FROM_ALL)
 
     add_subdirectory(testbed)
