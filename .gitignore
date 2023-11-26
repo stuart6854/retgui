@@ -12,6 +12,7 @@ Makefile
 # Build
 bin/
 obj/
+build/
 
 # Uneeded Resources
 *.rbin
