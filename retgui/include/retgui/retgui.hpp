@@ -7,7 +7,7 @@
 namespace retgui
 {
 	//////////////////////////////////////////////////////////////////////////
-	// Utility
+	/// Utility
 	//////////////////////////////////////////////////////////////////////////
 
 #pragma region Utility
@@ -19,37 +19,37 @@ namespace retgui
 	};
 
 	template <typename E>
-	typename std::enable_if_t<FEnableBitmaskOperators<E>::enable, E> operator|(E lhs, E rhs)
+	std::enable_if_t<FEnableBitmaskOperators<E>::enable, E> operator|(E lhs, E rhs)
 	{
 		return static_cast<E>(static_cast<std::underlying_type_t<E>>(lhs) | static_cast<std::underlying_type_t<E>>(rhs));
 	}
 	template <typename E>
-	typename std::enable_if_t<FEnableBitmaskOperators<E>::enable, E> operator&(E lhs, E rhs)
+	std::enable_if_t<FEnableBitmaskOperators<E>::enable, E> operator&(E lhs, E rhs)
 	{
 		return static_cast<E>(static_cast<std::underlying_type_t<E>>(lhs) & static_cast<std::underlying_type_t<E>>(rhs));
 	}
 	template <typename E>
-	typename std::enable_if_t<FEnableBitmaskOperators<E>::enable, E> operator^(E lhs, E rhs)
+	std::enable_if_t<FEnableBitmaskOperators<E>::enable, E> operator^(E lhs, E rhs)
 	{
 		return static_cast<E>(static_cast<std::underlying_type_t<E>>(lhs) ^ static_cast<std::underlying_type_t<E>>(rhs));
 	}
 	template <typename E>
-	typename std::enable_if_t<FEnableBitmaskOperators<E>::enable, E> operator~(E e)
+	std::enable_if_t<FEnableBitmaskOperators<E>::enable, E> operator~(E e)
 	{
 		return static_cast<E>(~static_cast<std::underlying_type_t<E>>(e));
 	}
 	template <typename E>
-	typename std::enable_if_t<FEnableBitmaskOperators<E>::enable, E> operator|=(E lhs, E rhs)
+	std::enable_if_t<FEnableBitmaskOperators<E>::enable, E> operator|=(E lhs, E rhs)
 	{
 		return lhs = static_cast<E>(static_cast<std::underlying_type_t<E>>(lhs) | static_cast<std::underlying_type_t<E>>(rhs));
 	}
 	template <typename E>
-	typename std::enable_if_t<FEnableBitmaskOperators<E>::enable, E> operator&=(E lhs, E rhs)
+	std::enable_if_t<FEnableBitmaskOperators<E>::enable, E> operator&=(E lhs, E rhs)
 	{
 		return lhs = static_cast<E>(static_cast<std::underlying_type_t<E>>(lhs) & static_cast<std::underlying_type_t<E>>(rhs));
 	}
 	template <typename E>
-	typename std::enable_if_t<FEnableBitmaskOperators<E>::enable, E> operator^=(E lhs, E rhs)
+	std::enable_if_t<FEnableBitmaskOperators<E>::enable, E> operator^=(E lhs, E rhs)
 	{
 		return lhs = static_cast<E>(static_cast<std::underlying_type_t<E>>(lhs) ^ static_cast<std::underlying_type_t<E>>(rhs));
 	}
@@ -57,7 +57,7 @@ namespace retgui
 #pragma endregion
 
 	//////////////////////////////////////////////////////////////////////////
-	// Core
+	/// Core
 	//////////////////////////////////////////////////////////////////////////
 
 #pragma region Core
@@ -75,6 +75,7 @@ namespace retgui
 
 	enum class EWidgetFlags
 	{
+		None = 0,
 		Clickable = 1 << 0,		 // Takes mouse events and hovering, responds to clicks and drags.
 		ViewScroll = 1 << 1,	 // Mouse wheel scrolling to shift the "view offset".
 		DrawText = 1 << 2,		 // Require text to be rendered.
@@ -91,45 +92,107 @@ namespace retgui
 		static constexpr bool enable = true;
 	};
 
+	using WidgetPtr = struct Widget*;
 	struct Widget
 	{
 		// Tree links
-		Widget* First;
-		Widget* Last;
-		Widget* Next;
-		Widget* Prev;
-		Widget* Parent;
+		std::shared_ptr<Widget> First = nullptr;
+		std::shared_ptr<Widget> Last = nullptr;
+		std::shared_ptr<Widget> Next = nullptr;
+		std::shared_ptr<Widget> Prev = nullptr;
+		std::shared_ptr<Widget> Parent = nullptr;
 
-		EWidgetFlags Flags;
+		EWidgetFlags Flags = EWidgetFlags::None;
 		std::string String;
 
 		Rect rect;
-	};
 
-	using WidgetPtr = std::shared_ptr<Widget>;
+		void Reparent(WidgetPtr newParent) {}
+
+		void RemoveFromParent()
+		{
+			if (Parent)
+				Parent->RemoveChild(this);
+			Parent = nullptr;
+		}
+
+		auto Query(std::string queryStr) -> WidgetPtr;
+
+	private:
+		void RemoveChild(WidgetPtr childWidget)
+		{
+			auto widget = First;
+			while (widget != nullptr)
+			{
+				if (widget.get() != childWidget)
+				{
+					widget = widget->Next;
+					continue;
+				}
+
+				if (widget->Prev)
+					widget->Prev->Next = widget->Next;
+
+				break;
+			}
+
+			if (First.get() == childWidget)
+				First = First->Next;
+			if (Last.get() == childWidget)
+				Last = Last->Prev;
+		}
+	};
 
 	// class Screen;	??
 	// class Viewport	??
 	// class Context;	??
 
+	class Viewport
+	{
+	public:
+		auto CreateWidget() -> WidgetPtr {}
+
+		auto Query(std::string queryStr) -> WidgetPtr;
+
+	private:
+		WidgetPtr Root = nullptr;
+	};
+
 #pragma endregion
+
+	//////////////////////////////////////////////////////////////////////////
+	/// Widgets
+	//////////////////////////////////////////////////////////////////////////
 
 #pragma region Widgets
 
-	auto CreateButton(const std::string& text) -> WidgetPtr
+	inline auto CreatePanel(Viewport& viewport) -> WidgetPtr
 	{
-		Widget widget;
-		widget.Flags |= EWidgetFlags::Clickable;
-		widget.Flags |= EWidgetFlags::DrawText;
-		widget.Flags |= EWidgetFlags::DrawBorder;
-		widget.Flags |= EWidgetFlags::DrawBackground;
-		widget.Flags |= EWidgetFlags::DrawDropShadow;
-		widget.String = text;
+		auto* widget = viewport.CreateWidget();
+		widget->Flags |= EWidgetFlags::DrawBorder;
+		widget->Flags |= EWidgetFlags::DrawBackground;
 
-		return nullptr;
+		return widget;
+	}
+
+	inline auto CreateButton(Viewport& viewport, const std::string& text) -> WidgetPtr
+	{
+		auto* widget = viewport.CreateWidget();
+		widget->Flags |= EWidgetFlags::Clickable;
+		widget->Flags |= EWidgetFlags::DrawText;
+		widget->Flags |= EWidgetFlags::DrawBorder;
+		widget->Flags |= EWidgetFlags::DrawBackground;
+		widget->Flags |= EWidgetFlags::DrawDropShadow;
+		widget->String = text;
+
+		return widget;
 	}
 
 #pragma endregion
+
+	//////////////////////////////////////////////////////////////////////////
+	///
+	//////////////////////////////////////////////////////////////////////////
 
 	// Update Stages
 	// 1) Auto-layout
